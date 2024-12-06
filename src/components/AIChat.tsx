@@ -133,6 +133,24 @@ export default function Chat() {
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 border-t dark:border-slate-800">
+          <div className="mb-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button type="button" variant="ghost" disabled={isLoading} className="bg-transparent">
+                  <div className="flex justify-center items-center gap-x-2">
+                    <SparklesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" /> <span>Pilih Prompt</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="dark:bg-gray-800 dark:border-gray-700 w-64">
+                {PROMPTS.map((prompt) => (
+                  <DropdownMenuItem key={prompt.id} onSelect={() => handlePromptSelect(prompt.prompt)} className="dark:hover:bg-gray-700 dark:text-gray-200">
+                    {prompt.title}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <div className="relative flex items-end gap-2">
             <div className="relative flex-1">
               <Textarea
@@ -146,21 +164,7 @@ export default function Chat() {
                 rows={1}
               />
               <div className="absolute right-2 bottom-2 flex gap-1">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button type="button" size="icon" variant="ghost" disabled={isLoading} className="h-8 w-8 dark:hover:bg-gray-700 hover:bg-gray-100">
-                      <SparklesIcon className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="dark:bg-gray-800 dark:border-gray-700 w-64">
-                    {PROMPTS.map((prompt) => (
-                      <DropdownMenuItem key={prompt.id} onSelect={() => handlePromptSelect(prompt.prompt)} className="dark:hover:bg-gray-700 dark:text-gray-200">
-                        {prompt.title}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button type="submit" size="icon" disabled={!input.trim() || isLoading} className="h-8 w-8">
+                <Button type="submit" size="icon" disabled={!input.trim() || isLoading} className="h-7 w-7">
                   <SendIcon className="h-4 w-4" />
                 </Button>
               </div>
