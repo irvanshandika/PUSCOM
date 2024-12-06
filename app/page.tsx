@@ -2,6 +2,7 @@ import Navbar from "@/src/components/Navbar";
 import HeroSection from "@/src/sections/HeroSection";
 import FeaturesSection from "@/src/sections/FeaturesSection";
 import CTASection from "@/src/sections/CTASection";
+import AIChat from "@/src/components/AIChat";
 import Footer from "@/src/components/Footer";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <HeroSection />
       <FeaturesSection />
       <CTASection />
+      <AIChat />
       <Footer />
     </main>
   );

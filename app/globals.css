@@ -86,3 +86,25 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+textarea {
+  transition: height 0.2s ease;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
