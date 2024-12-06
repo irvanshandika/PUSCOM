@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import HeroCarousel from "../components/HeroCarousel";
 
 export default function HeroSection() {
   return (
@@ -21,7 +22,7 @@ export default function HeroSection() {
           <div className="flex-1">
             <div className="relative h-[400px] w-full rounded-2xl bg-gradient-to-r from-blue-100 to-pink-100 dark:from-blue-950 dark:to-pink-950">
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl text-gray-500 dark:text-gray-400">Hero Image</span>
+                <HeroCarousel />
               </div>
             </div>
           </div>
