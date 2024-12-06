@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useState } from "react";
 import UserDropdown from "./UserDropdown";
+import ProfileDropdown from "./ProfileDropdown";
+import { auth, db } from "@/src/config/FirebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 const navItems = [
   {
@@ -32,9 +37,27 @@ const navItems = [
 ];
 const Navbar = () => {
   const [openNavbar, setOpenNavbar] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isUserExists, setIsUserExists] = useState(false);
+
   const toggleNavbar = () => {
     setOpenNavbar((openNavbar) => !openNavbar);
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        setIsUserExists(userDoc.exists());
+      } else {
+        setIsUserExists(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
   return (
     <header className="absolute left-0 top-0 w-full flex items-center h-24 z-40">
       <nav className="relative mx-auto lg:max-w-7xl w-full px-5 sm:px-10 md:px-12 lg:px-5 flex gap-x-5 justify-between items-center">
@@ -62,7 +85,15 @@ const Navbar = () => {
             ))}
           </ul>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4  lg:min-w-max mt-10 lg:mt-0">
-            <UserDropdown />
+            {user ? (
+              <>
+                <ProfileDropdown />
+              </>
+            ) : (
+              <>
+                <UserDropdown />
+              </>
+            )}
           </div>
         </div>
         <div className="flex items-center lg:hidden">
