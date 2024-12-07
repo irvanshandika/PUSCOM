@@ -13,6 +13,7 @@ import { toast } from "react-hot-toast";
 type Product = {
   id: string;
   name: string;
+  slug?: string;
   category: string;
   price: number;
   stock: number;
@@ -54,7 +55,7 @@ export default function ProductDashboard() {
   const handleAddProduct = async (product: Product) => {
     try {
       const docRef = await addDoc(collection(db, "products"), product);
-      setProducts([...products, { ...product, id: docRef.id }]);
+      setProducts([...products, { ...product, id: docRef.id, slug: docRef.id }]);
       setIsAddDialogOpen(false);
       toast.success("Produk berhasil ditambahkan");
     } catch (error) {

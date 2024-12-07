@@ -1,83 +1,124 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import { collection, query, getDocs, where } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { collection, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
-import { Input } from "@/src/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
-import { Card, CardContent, CardFooter } from "@/src/components/ui/card";
-import { Button } from "@/src/components/ui/button";
-import { Search, Filter, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Skeleton } from "@/src/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { Filter, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { Skeleton } from "@/src/components/ui/skeleton";
 
 type Product = {
   id: string;
   name: string;
+  slug: string;
   category: string;
   price: number;
+  stock: number;
   images: string[];
-  description: string;
 };
 
-export default function CatalogPage() {
+export default function CatalogMain() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [filters, setFilters] = useState({
+    category: "",
+    minPrice: "",
+    maxPrice: "",
+    search: "",
+  });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    productsPerPage: 12,
+    lastVisibleDoc: null as any,
+    firstVisibleDoc: null as any,
+  });
 
-  const CATEGORIES = ["Semua", "Komputer", "Laptop", "Spare Part"];
+  const fetchProducts = async (direction: "next" | "prev" | "initial" = "initial") => {
+    try {
+      setLoading(true);
+      const productsRef = collection(db, "products");
+      let q = query(productsRef);
+
+      if (filters.category) {
+        q = query(q, where("category", "==", filters.category));
+      }
+
+      if (filters.minPrice) {
+        q = query(q, where("price", ">=", Number(filters.minPrice)));
+      }
+      if (filters.maxPrice) {
+        q = query(q, where("price", "<=", Number(filters.maxPrice)));
+      }
+
+      if (filters.search) {
+        q = query(q, where("name", ">=", filters.search));
+      }
+
+      q = query(q, orderBy("name"), limit(pagination.productsPerPage));
+
+      if (direction === "next" && pagination.lastVisibleDoc) {
+        q = query(q, startAfter(pagination.lastVisibleDoc));
+      } else if (direction === "prev" && pagination.firstVisibleDoc) {
+        q = query(q, orderBy("name", "desc"), startAfter(pagination.firstVisibleDoc));
+      }
+
+      const querySnapshot = await getDocs(q);
+
+      const fetchedProducts = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as Product)
+      );
+
+      if (direction === "prev") {
+        fetchedProducts.reverse();
+      }
+
+      setProducts(fetchedProducts);
+      setPagination((prev) => ({
+        ...prev,
+        lastVisibleDoc: querySnapshot.docs[querySnapshot.docs.length - 1],
+        firstVisibleDoc: querySnapshot.docs[0],
+        currentPage: direction === "next" ? prev.currentPage + 1 : direction === "prev" ? prev.currentPage - 1 : 1,
+      }));
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      toast.error("Gagal memuat produk");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const productsRef = collection(db, "products");
+    fetchProducts("initial");
+  }, [filters]);
 
-        const querySnapshot = await getDocs(productsRef);
-
-        const fetchedProducts: Product[] = querySnapshot.docs.map(
-          (doc) =>
-            ({
-              id: doc.id,
-              ...doc.data(),
-            } as Product)
-        );
-
-        setProducts(fetchedProducts);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        toast.error("Gagal memuat produk");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === "Semua" || product.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, searchTerm, selectedCategory]);
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 mt-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[...Array(8)].map((_, index) => (
-            <div key={index} className="space-y-3">
-              <Skeleton className="h-[250px] w-full rounded-xl" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
+      <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {[...Array(12)].map((_, index) => (
+            <div key={index} className="space-y-2">
+              <Skeleton className="w-full aspect-square" />
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
             </div>
           ))}
         </div>
@@ -86,70 +127,60 @@ export default function CatalogPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 mt-12">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold dark:text-white">Katalog Produk</h1>
-      </div>
-
-      <div className="flex space-x-4 mb-8">
-        <div className="relative flex-grow">
-          <Input placeholder="Cari produk..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 dark:bg-neutral-800" />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-        </div>
-
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-[180px] dark:bg-neutral-800">
-            <div className="flex items-center">
-              <Filter className="mr-2 text-gray-400" size={16} />
-              <SelectValue placeholder="Kategori" />
-            </div>
+    <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
+      <div className="mb-8 grid md:grid-cols-4 gap-4">
+        <Select onValueChange={(value) => handleFilterChange("category", value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Kategori" />
           </SelectTrigger>
           <SelectContent>
-            {CATEGORIES.map((category) => (
+            {["Elektronik", "Fashion", "Olahraga", "Lainnya"].map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+
+        <Input type="number" placeholder="Harga Min" onChange={(e) => handleFilterChange("minPrice", e.target.value)} />
+
+        <Input type="number" placeholder="Harga Max" onChange={(e) => handleFilterChange("maxPrice", e.target.value)} />
+
+        <Input placeholder="Cari Produk" onChange={(e) => handleFilterChange("search", e.target.value)} />
       </div>
 
-      {filteredProducts.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">Tidak ada produk ditemukan</div>
+      {products.length === 0 ? (
+        <div className="text-center py-16">
+          <p className="text-xl">Tidak ada produk ditemukan</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <Link href={`/product/${product.id}`} key={product.id}>
-              <Card className="hover:shadow-lg transition-shadow duration-300 dark:bg-neutral-800 border-none cursor-pointer">
-                <CardContent className="p-4">
-                  <div className="relative w-full aspect-square mb-4 overflow-hidden rounded-lg">
-                    <Image src={product.images[0] || "/placeholder.png"} alt={product.name} fill className="object-cover hover:scale-105 transition-transform" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold truncate dark:text-white">{product.name}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{product.category}</p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold dark:text-white">Rp {product.price.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <Link href={`/product/${product.slug}`} key={product.id} className="group">
+              <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
+                <Image src={product.images[0]} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+              </div>
+              <h3 className="text-lg font-semibold truncate">{product.name}</h3>
+              <div className="flex justify-between items-center">
+                <p className="text-gray-600">Rp {product.price.toLocaleString()}</p>
+                <span className="text-xs text-green-600">Stok: {product.stock}</span>
+              </div>
             </Link>
           ))}
         </div>
       )}
 
-      {filteredProducts.length > 0 && (
-        <div className="flex justify-center mt-8">
-          <div className="flex space-x-2">
-            {[1, 2, 3].map((page) => (
-              <Button key={page} variant="outline" size="sm" className="dark:text-white">
-                {page}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex justify-center mt-8 space-x-4">
+        <Button variant="outline" disabled={pagination.currentPage === 1} onClick={() => fetchProducts("prev")}>
+          <ArrowLeft className="mr-2" /> Sebelumnya
+        </Button>
+
+        <Button variant="outline" onClick={() => fetchProducts("next")}>
+          Selanjutnya <ArrowRight className="ml-2" />
+        </Button>
+      </div>
+
+      <div className="text-center mt-4 text-gray-600">Halaman {pagination.currentPage}</div>
     </div>
   );
 }
