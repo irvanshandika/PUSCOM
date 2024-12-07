@@ -88,8 +88,16 @@ export default function AddProductDialog({ open, onClose, onSubmit }: AddProduct
     setEcommerceLinks(newLinks);
   };
 
+  function generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .trim();
+  }
+
   const handleSubmit = async () => {
-    // Validasi input
     if (!name || !category || !price || !stock) {
       toast.error("Harap isi semua field wajib");
       return;
@@ -98,36 +106,32 @@ export default function AddProductDialog({ open, onClose, onSubmit }: AddProduct
     setIsSubmitting(true);
 
     try {
-      // Inisialisasi Firebase Storage
       const storage = getStorage();
 
-      // Upload gambar ke Firebase Storage
       const imageUrls: string[] = [];
       for (const file of images) {
-        // Buat referensi unik untuk setiap gambar
         const imageRef = ref(storage, `products/${Date.now()}_${file.name}`);
 
-        // Upload gambar
         const snapshot = await uploadBytes(imageRef, file);
 
-        // Dapatkan URL download
         const downloadURL = await getDownloadURL(snapshot.ref);
         imageUrls.push(downloadURL);
       }
 
-      // Siapkan data produk
+      const slug = generateSlug(name);
+
       const productData = {
         name,
         category,
+        slug,
         price: parseFloat(price),
         stock: parseInt(stock),
         description,
         condition,
-        images: imageUrls, // Gunakan URL dari Firebase Storage
+        images: imageUrls,
         ecommerceLinks: ecommerceLinks.filter((link) => link.platform && link.url),
       };
 
-      // Panggil fungsi onSubmit dengan data produk
       await onSubmit(productData);
 
       toast.success("Produk berhasil ditambahkan");
@@ -304,7 +308,6 @@ export default function AddProductDialog({ open, onClose, onSubmit }: AddProduct
   );
 }
 
-// Fungsi validasi data produk
 const validateProductData = (data: any) => {
   const errors: string[] = [];
 
@@ -313,7 +316,6 @@ const validateProductData = (data: any) => {
   if (!data.price || data.price <= 0) errors.push("Harga harus valid");
   if (!data.stock || data.stock < 0) errors.push("Stok harus valid");
 
-  // Validasi URL e-commerce
   data.ecommerceLinks?.forEach((link: ECommerceLink) => {
     if (link.platform && !isValidUrl(link.url)) {
       errors.push(`URL ${link.platform} tidak valid`);
@@ -323,7 +325,6 @@ const validateProductData = (data: any) => {
   return errors;
 };
 
-// Fungsi pengecekan URL
 const isValidUrl = (url: string): boolean => {
   try {
     new URL(url);
