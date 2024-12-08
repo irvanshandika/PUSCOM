@@ -56,7 +56,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+      <head>
+        <link rel="preload" href="https://use.typekit.net/nvv4ips.css" />
+      </head>
+      <body className="antialiased font-komet">
         <Toaster position="top-right" />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
