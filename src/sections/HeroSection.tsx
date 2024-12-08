@@ -11,10 +11,10 @@ export default function HeroSection() {
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white">Solusi Digital untuk Kebutuhan Komputer Anda</h1>
             <p className="text-lg text-gray-600 dark:text-gray-300">PUSCOM menyediakan layanan jual beli komputer & laptop, servis, dan spare part berkualitas dengan harga terbaik.</p>
             <div className="flex gap-4">
-              <Link href="/products" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <Link href="/catalog" className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Lihat Produk
               </Link>
-              <Link href="/services" className="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition">
+              <Link href="/service" className="px-6 py-3 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                 Layanan Servis
               </Link>
             </div>

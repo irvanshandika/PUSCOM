@@ -12,10 +12,8 @@ const generateBreadcrumbs = (pathname: string) => {
 
   const breadcrumbMapping: { [key: string]: string } = {
     dashboard: "Dashboard",
-    profile: "Profile",
-    settings: "Pengaturan",
-    consultation: "Konsultasi",
-    help: "Bantuan",
+    users: "Dashboard Pengguna",
+    products: "Dashboard Produk",
   };
 
   return pathSegments.map((segment, index) => {
