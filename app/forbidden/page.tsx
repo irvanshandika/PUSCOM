@@ -3,6 +3,11 @@ import Navbar from "@/src/components/Navbar";
 import Footer from "@/src/components/Footer";
 import Link from "next/link";
 import { Shield, Lock } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "403 - Akses Ditolak",
+};
 
 function forbidden() {
   return (
