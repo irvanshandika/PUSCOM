@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
 		fontFamily: {
-			"adobe-clean": ["adobe-clean", "sans-serif"],
+			"komet": ["komet", "sans-serif"],
 		},
       colors: {
         background: "hsl(var(--background))",
