@@ -6,9 +6,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/src/components/ui/carousel";
 import { Button } from "@/src/components/ui/button";
-import { ShoppingCart, Heart, Share2, ChevronRight } from "lucide-react";
+import { ShoppingCart, Heart, Share2, ChevronRight, Copy, Check } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { Skeleton } from "@/src/components/ui/skeleton";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import { Input } from "@/src/components/ui/input";
 
 interface Product {
   id: string;
@@ -24,6 +26,13 @@ interface Product {
     url: string;
   }>;
 }
+
+const PLATFORM_ICONS = {
+  Shopee: "https://deo.shopeemobile.com/shopee/shopee-pcmall-live-sg/assets/icon_favicon_1_32.0Wecxv.png",
+  Blibli: "https://www.static-src.com/siva/asset/10_2023/icon-144px.png",
+  Tokopedia: "https://images.tokopedia.net/assets-tokopedia-lite/prod/icon192.png",
+  Lazada: "https://lzd-img-global.slatic.net/g/tps/tfs/TB1e_.JhHY1gK0jSZTEXXXDQVXa-64-64.png",
+};
 
 interface RelatedProduct {
   id: string;
@@ -42,6 +51,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
   const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -103,6 +113,46 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity((prev) => prev - 1);
+    }
+  };
+
+  const handleShare = async () => {
+    // Cek apakah browser mendukung Web Share API
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name,
+          text: `Lihat produk ${product?.name} di toko kami!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error("Gagal berbagi:", error);
+        toast.error("Gagal berbagi produk");
+      }
+    } else {
+      // Fallback untuk browser yang tidak mendukung Web Share API
+      handleCopyLink();
+    }
+  };
+
+  // Fungsi copy link
+  const handleCopyLink = () => {
+    if (product) {
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => {
+          setCopied(true);
+          toast.success("Link produk disalin");
+
+          // Reset copied state setelah 2 detik
+          setTimeout(() => {
+            setCopied(false);
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error("Gagal menyalin:", err);
+          toast.error("Gagal menyalin link");
+        });
     }
   };
 
@@ -173,9 +223,63 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
             <Button variant="outline" size="icon">
               <Heart />
             </Button>
-            <Button variant="outline" size="icon">
-              <Share2 />
+            <Button variant="outline" size="icon" onClick={handleShare} title="Bagikan Produk">
+              {copied ? <Check className="text-green-500" /> : <Share2 />}
             </Button>
+          </div>
+
+          <div className="mt-4">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Share2 className="mr-2" /> Bagikan Produk
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Bagikan Produk</DialogTitle>
+                  <DialogDescription>Pilih metode berbagi produk</DialogDescription>
+                </DialogHeader>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    {
+                      name: "WhatsApp",
+                      icon: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
+                      shareUrl: (url: string) => `https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`,
+                    },
+                    {
+                      name: "Facebook",
+                      icon: "https://upload.wikimedia.org/wikipedia/commons/0/05/Facebook_Logo_%282019%29.png",
+                      shareUrl: (url: string) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+                    },
+                    {
+                      name: "Twitter",
+                      icon: "https://api.iconify.design/devicon:twitter.svg",
+                      shareUrl: (url: string) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`,
+                    },
+                  ].map((platform) => (
+                    <Button
+                      key={platform.name}
+                      variant="outline"
+                      className="flex flex-col items-center"
+                      onClick={() => {
+                        if (product) {
+                          window.open(platform.shareUrl(window.location.href), "_blank");
+                        }
+                      }}>
+                      <Image src={platform.icon} alt={`${platform.name} Icon`} width={32} height={32} className="mb-2" />
+                      {platform.name}
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex items-center space-x-2 mt-4">
+                  <Input value={window.location.href} readOnly className="flex-grow" />
+                  <Button variant="outline" onClick={handleCopyLink}>
+                    {copied ? <Check className="text-green-500" /> : <Copy />}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="mt-8">
@@ -187,14 +291,21 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
             <div className="mt-8">
               <h2 className="text-xl font-semibold mb-4">Beli di Platform Lain</h2>
               <div className="grid grid-cols-2 gap-4">
-                {product.ecommerceLinks.map((link, index) => (
-                  <Link key={index} href={link.url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="w-full">
-                      {link.platform}
-                      <ChevronRight className="ml-2" size={16} />
-                    </Button>
-                  </Link>
-                ))}
+                {product.ecommerceLinks.map((link, index) => {
+                  const PlatformIcon = PLATFORM_ICONS[link.platform as keyof typeof PLATFORM_ICONS];
+
+                  return (
+                    <Link key={index} href={link.url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="w-full flex items-center justify-between">
+                        <div className="flex items-center justify-center">
+                          {PlatformIcon && <Image src={PlatformIcon} alt={`${link.platform} Icon`} width={24} height={24} className="mr-2" />}
+                          <span>{link.platform}</span>
+                        </div>
+                        <ChevronRight className="ml-2" size={16} />
+                      </Button>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}
