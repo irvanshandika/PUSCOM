@@ -40,7 +40,7 @@ Perkenalan: "Halo! Saya Jackie AI, asisten digital dari PUSCOM. Saya siap memban
 
   try {
     const response = await groq.chat.completions.create({
-      model: "llama-3.2-90b-vision-preview",
+      model: "llama-3.3-70b-specdec",
       stream: true,
       max_tokens: 1024,
       temperature: 0.7,
