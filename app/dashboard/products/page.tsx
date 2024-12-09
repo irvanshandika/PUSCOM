@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Sidebar from "@/src/components/Sidebar";
 
 export const metadata: Metadata = {
-  title: "Dashboard Product",
+  title: "Dashboard Produk",
 };
 
 function Product() {

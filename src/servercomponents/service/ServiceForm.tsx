@@ -81,9 +81,7 @@ export function ServiceForm() {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const validFiles = acceptedFiles.filter(validateImage);
-
       const newImages = [...images, ...validFiles].slice(0, 5);
-
       setImages(newImages);
       setValue("images", newImages);
     },
@@ -140,140 +138,202 @@ export function ServiceForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(() => setShowConfirmDialog(true))} className="space-y-4">
-      {/* Nama Lengkap */}
-      <div>
-        <Input {...register("name")} placeholder="Nama Lengkap" className="mb-2" />
-        {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
-      </div>
+    <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <form onSubmit={handleSubmit(() => setShowConfirmDialog(true))} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Nama Lengkap */}
+          <div className="space-y-2">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              Nama Lengkap
+            </label>
+            <Input id="name" {...register("name")} placeholder="Nama Lengkap" className="w-full" />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+          </div>
 
-      {/* Nomor Telepon */}
-      <div>
-        <Input {...register("phoneNumber")} placeholder="Nomor Telepon" className="mb-2" type="tel" />
-        {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>}
-      </div>
+          {/* Nomor Telepon */}
+          <div className="space-y-2">
+            <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+              Nomor Telepon
+            </label>
+            <Input id="phoneNumber" {...register("phoneNumber")} placeholder="Nomor Telepon" type="tel" className="w-full" />
+            {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>}
+          </div>
+        </div>
 
-      {/* Jenis Perangkat */}
-      <Controller
-        name="deviceType"
-        control={control}
-        render={({ field }) => (
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <SelectTrigger>
-              <SelectValue placeholder="Pilih Jenis Perangkat" />
-            </SelectTrigger>
-            <SelectContent>
-              {["Laptop", "Komputer"].map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      />
-
-      {/* Brand dan Tipe Perangkat */}
-      {(deviceType === "Laptop" || deviceType === "Komputer") && (
-        <>
+        {/* Jenis Perangkat */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Jenis Perangkat</label>
           <Controller
-            name="brand"
+            name="deviceType"
             control={control}
             render={({ field }) => (
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Pilih Brand" />
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Pilih Jenis Perangkat" />
                 </SelectTrigger>
                 <SelectContent>
-                  {deviceType === "Laptop"
-                    ? ["Asus", "Acer", "Lenovo", "HP", "Dell", "Apple", "MSI", "Others"]
-                    : ["Dell", "HP", "Lenovo", "Acer", "Asus", "Apple", "Custom Built", "Others"].map((brandName) => (
-                        <SelectItem key={brandName} value={brandName}>
-                          {brandName}
-                        </SelectItem>
-                      ))}
+                  {["Laptop", "Komputer"].map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )}
           />
+        </div>
 
-          {brand === "Others" && (
-            <>
-              <Input {...register("customBrand")} placeholder={deviceType === "Laptop" ? "Masukkan Brand Laptop Lainnya" : "Masukkan Brand Komputer Lainnya"} className="mb-4" />
-            </>
-          )}
+        {(deviceType === "Laptop" || deviceType === "Komputer") && (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">Brand</label>
+              <Controller
+                name="brand"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Pilih Brand" />
+                    </SelectTrigger>
+                    <SelectContent position="item-aligned">
+                      {deviceType === "Laptop"
+                        ? ["Asus", "Acer", "Lenovo", "HP", "Dell", "Apple", "MSI", "Samsung", "Fujitsu", "LG", "Toshiba", "Razer", "Alienware", "Others"].map((brandName) => (
+                            <SelectItem key={brandName} value={brandName}>
+                              {brandName}
+                            </SelectItem>
+                          ))
+                        : ["Dell", "HP", "Lenovo", "Acer", "Asus", "Apple", "Custom Built", "Others"].map((brandName) => (
+                            <SelectItem key={brandName} value={brandName}>
+                              {brandName}
+                            </SelectItem>
+                          ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
 
-          {deviceType === "Laptop" && <Input {...register("model")} placeholder="Model Laptop" className="mb-4" />}
+            {brand === "Others" && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Brand Lainnya</label>
+                <Input {...register("customBrand")} placeholder={deviceType === "Laptop" ? "Masukkan Brand Laptop Lainnya" : "Masukkan Brand Komputer Lainnya"} className="w-full" />
+              </div>
+            )}
 
-          {deviceType === "Komputer" && (
+            {deviceType === "Laptop" && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Model Laptop</label>
+                <Input {...register("model")} placeholder="Model Laptop" className="w-full" />
+              </div>
+            )}
+
+            {deviceType === "Komputer" && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Tipe Komputer</label>
+                <Controller
+                  name="computerType"
+                  control={control}
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Pilih Tipe Komputer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {["All in One", "Gaming", "Desktop", "Mini PC", "Workstation"].map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Deskripsi Kerusakan */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Deskripsi Kerusakan</label>
+          <div className="w-full">
             <Controller
-              name="computerType"
+              name="damage"
               control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Tipe Komputer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {["All in One", "Gaming", "Desktop", "Mini PC", "Workstation"].map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              render={({ field }) => <MDEditor value={field.value} onChange={(value) => field.onChange(value)} height="200px" placeholder="Deskripsikan detail kerusakan" />}
             />
-          )}
-        </>
-      )}
+          </div>
+          {errors.damage && <p className="text-red-500 text-sm">{errors.damage.message}</p>}
+        </div>
 
-      {/* Deskripsi Kerusakan */}
-      <div className="mb-4">
-        <Controller name="damage" control={control} render={({ field }) => <MDEditor value={field.value} onChange={(value) => field.onChange(value)} height="200px" placeholder="Deskripsikan detail kerusakan" />} />
-        {errors.damage && <p className="text-red-500 text-sm mt-1">{errors.damage.message}</p>}
-      </div>
+        {/* Upload Gambar */}
+        <div className="space-y-4">
+          <label className="block text-sm font-medium text-gray-700">Foto Kerusakan</label>
+          <div
+            {...getRootProps()}
+            className={`
+              p-6 border-2 border-dashed rounded-lg text-center cursor-pointer
+              transition-colors duration-300
+              ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-500"}
+            `}>
+            <input {...getInputProps()} />
+            <div className="flex flex-col items-center justify-center">
+              <Upload className="w-12 h-12 text-gray-400 mb-4" />
+              <p className="text-gray-600 text-sm sm:text-base">{isDragActive ? "Lepaskan file di sini" : "Seret & lepas gambar atau klik untuk memilih"}</p>
+              <p className="text-xs text-gray-500 mt-2">Maksimal 5 gambar (JPEG, PNG, GIF) - Maks 5MB per file</p>
+            </div>
+          </div>
 
-      {/* Upload Gambar */}
-      <div className="space-y-4">
-        <div
-          {...getRootProps()}
-          className={`
-                              p-6 border-2 border-dashed rounded-lg text-center cursor-pointer
-                              transition-colors duration-300
-                              ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-500"}
-                            `}>
-          <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center">
-            <Upload className="w-12 h-12 text-gray-400 mb-4" />
-            <p className="text-gray-600">{isDragActive ? "Lepaskan file di sini" : "Seret & lepas gambar atau klik untuk memilih"}</p>
-            <p className="text-xs text-gray-500 mt-2">Maksimal 5 gambar (JPEG, PNG, GIF) - Maks 5MB per file</p>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+            {images.map((image, index) => (
+              <div key={index} className="relative aspect-square">
+                <img src={URL.createObjectURL(image)} alt={`Upload ${index}`} className="w-full h-full object-cover rounded" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-lg">
+                  X
+                </button>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="flex gap-2">
-          {images.map((image, index) => (
-            <div key={index} className="relative">
-              <img src={URL.createObjectURL(image)} alt={`Upload ${index}`} className="w-20 h-20 object-cover rounded" />
-              <button type="button" onClick={() => removeImage(index)} className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 text-xs">
-                X
-              </button>
-            </div>
-          ))}
+        {/* Tanggal Service */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Tanggal Service</label>
+          <div className="border rounded-lg p-4 w-full overflow-x-auto">
+            <Controller
+              name="date"
+              control={control}
+              render={({ field }) => <Calendar mode="single" selected={field.value} onSelect={(date) => field.onChange(date)} className="mx-auto" />}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Tanggal Service */}
-      <Controller name="date" control={control} render={({ field }) => <Calendar mode="single" selected={field.value} onSelect={(date) => field.onChange(date)} className="rounded-md border" />} />
+        {/* Tombol Submit */}
+        <Button type="submit" disabled={isSubmitting} className="w-full">
+          {isSubmitting ? "Mengirim..." : "Ajukan Service"}
+        </Button>
 
-      {/* Tombol Submit */}
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? "Mengirim..." : "Ajukan Service"}
-      </Button>
+        {/* Error Validasi */}
+        {Object.keys(errors).length > 0 && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+            <strong className="font-bold">Error Validasi: </strong>
+            <ul className="list-disc list-inside">
+              {Object.entries(errors).map(([key, error]) => (
+                <li key={key} className="text-sm">
+                  {key}: {error?.message?.toString()}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </form>
 
       {/* Konfirmasi Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="sm:max-w-[425px]">
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Pengajuan Service</AlertDialogTitle>
             <AlertDialogDescription>Pastikan semua data yang Anda masukkan sudah benar. Apakah Anda yakin ingin mengirimkan pengajuan service?</AlertDialogDescription>
@@ -286,21 +346,7 @@ export function ServiceForm() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Error Validasi */}
-      {Object.keys(errors).length > 0 && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          <strong className="font-bold">Error Validasi: </strong>
-          <ul>
-            {Object.entries(errors).map(([key, error]) => (
-              <li key={key} className="text-sm">
-                {key}: {error?.message?.toString()}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </form>
+    </div>
   );
 }
 

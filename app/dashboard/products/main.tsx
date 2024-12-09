@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState, useEffect } from "react";
-import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc, getDoc } from "firebase/firestore";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/src/components/ui/alert-dialog";
-import { db } from "@/src/config/FirebaseConfig";
+import { db, auth } from "@/src/config/FirebaseConfig";
+import { useRouter } from "next/navigation";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { PlusCircle, Edit, Trash2 } from "lucide-react";
 import AddProductDialog from "@/src/servercomponents/dashboard/products/AddProductDialog";
 import EditProductDialog from "@/src/servercomponents/dashboard/products/EditProductDialog";
@@ -31,6 +32,10 @@ export default function ProductDashboard() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [user, loading, error] = useAuthState(auth);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingRole, setCheckingRole] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetchProducts();
@@ -99,6 +104,46 @@ export default function ProductDashboard() {
     setSelectedProduct(product);
     setIsEditDialogOpen(true);
   };
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setIsAdmin(userData.roles === "admin");
+        } else {
+          setIsAdmin(false);
+        }
+        setCheckingRole(false);
+      }
+    };
+
+    if (user) {
+      checkUserRole();
+    } else if (!loading) {
+      router.push("/auth/signin");
+    }
+  }, [user, loading, router]);
+
+  if (loading || checkingRole) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl font-semibold">Memeriksa hak akses...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  if (!isAdmin) {
+    router.push("/forbidden");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background dark:bg-black/90 p-6">
