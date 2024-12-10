@@ -58,6 +58,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preload" href="https://use.typekit.net/nvv4ips.css" />
+        <meta name="google-site-verification" content="OJGaC9hOIiPX7zJ1nmCKlPbHQ656ytp6atR4V_F8obc" />
       </head>
       <body className="antialiased font-komet">
         <Toaster position="top-right" />
@@ -74,6 +75,7 @@ export default function RootLayout({
             gtag('config', 'G-80DERZ2CNY');
           `}
         </Script>
+        <Script src="https://device.maxmind.com/js/device.js"></Script>
       </body>
     </html>
   );
