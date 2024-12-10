@@ -4,10 +4,12 @@ import { useChat } from "ai/react";
 import MarkdownIt from "markdown-it";
 import { Button } from "@/src/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
-import { MessageCircle, SparklesIcon, SendIcon } from "lucide-react";
+import { SparklesIcon, SendIcon } from "lucide-react";
 import { Textarea } from "@/src/components/ui/textarea";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import RobotIcon from "./icons/RobotIcon";
+import PersonIcon from "./icons/PersonIcon";
 
 const md = new MarkdownIt({
   html: true,
@@ -34,12 +36,26 @@ const PROMPTS = [
 
 export default function Chat() {
   const [open, setOpen] = useState(false);
+  const [isFirstChat, setIsFirstChat] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, setMessages, input, handleInputChange, handleSubmit, error, reload, isLoading } = useChat({
     keepLastMessageOnError: true,
     api: "/api/chat/groq",
   });
+
+  useEffect(() => {
+    if (messages.length === 0 && isFirstChat) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: "Halo! Saya Jackie AI dari PUSCOM, asisten web cerdas yang siap membantu Anda dengan segala hal seputar komputer dan laptop.",
+        },
+      ]);
+      setIsFirstChat(false);
+    }
+  }, [messages, isFirstChat, setMessages]);
 
   const handleDelete = (id: string) => {
     setMessages(messages.filter((message) => message.id !== id));
@@ -83,25 +99,22 @@ export default function Chat() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-4 right-4 w-12 h-12 rounded-full shadow-lg" size="icon" variant="secondary">
-          <MessageCircle className="h-6 w-6" />
+        <Button className="fixed bottom-4 right-4 w-16 h-16 rounded-full shadow-lg" size="icon" variant="secondary">
+          <RobotIcon className="size-32" />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] h-[600px] flex flex-col p-0">
         <DialogHeader className="px-4 py-2 border-b flex flex-row justify-between items-center">
           <DialogTitle>Chat dengan AI</DialogTitle>
         </DialogHeader>
-
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               <div className={`group relative max-w-[80%] px-4 py-2 rounded-lg ${message.role === "user" ? "bg-blue-500 text-white dark:bg-blue-600" : "bg-gray-100 dark:bg-slate-800 dark:text-slate-100"}`}>
-                <div className="text-xs opacity-75 mb-1">{message.role === "user" ? "Anda" : "Jackie AI"}</div>
-                <button
-                  onClick={() => handleDelete(message.id)}
-                  className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  ×
-                </button>
+                <span className="flex items-center gap-2 mb-1">
+                  {message.role === "user" ? <PersonIcon className="h-5 w-5" /> : <RobotIcon className="h-5 w-5" />}
+                  <h2>{message.role === "user" ? "Anda" : "Jackie AI"}</h2>
+                </span>
                 <div
                   className="text-sm prose dark:prose-invert max-w-none break-words"
                   dangerouslySetInnerHTML={{
@@ -148,6 +161,32 @@ export default function Chat() {
                     {prompt.title}
                   </DropdownMenuItem>
                 ))}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`group relative max-w-[80%] px-4 py-2 rounded-lg ${message.role === "user" ? "bg-blue-500 text-white dark:bg-blue-600" : "bg-gray-100 dark:bg-slate-800 dark:text-slate-100"}`}>
+                        {message.id !== "welcome" && (
+                          <button
+                            onClick={() => handleDelete(message.id)}
+                            className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                            ×
+                          </button>
+                        )}
+                        <div className="flex items-center gap-2 mb-1">
+                          {message.role === "user" ? <PersonIcon className="h-5 w-5" /> : <RobotIcon className="h-5 w-5" />}
+                          <div className="text-xs opacity-75 mb-1">{message.role === "user" ? "Anda" : "Jackie AI"}</div>
+                        </div>
+                        <div
+                          className="text-sm prose dark:prose-invert max-w-none break-words"
+                          dangerouslySetInnerHTML={{
+                            __html: md.render(message.content),
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

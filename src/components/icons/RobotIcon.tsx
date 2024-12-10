@@ -1,6 +1,6 @@
 import React, { SVGProps } from "react";
 
-export default function BotProfile(props: SVGProps<SVGSVGElement>) {
+export default function RobotIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" {...props}>
