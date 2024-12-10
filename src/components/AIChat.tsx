@@ -99,7 +99,7 @@ export default function Chat() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-4 right-4 w-16 h-16 rounded-full shadow-lg" size="icon" variant="secondary">
+        <Button className="fixed bottom-4 right-4 w-16 h-16 rounded-full shadow-lg" size="icon" variant="secondary" aria-label="Chat AI">
           <RobotIcon className="size-32" />
         </Button>
       </DialogTrigger>

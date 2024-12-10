@@ -74,7 +74,7 @@ export default function Footer() {
             </Link>
           ))}
         </div>
-        <p className="mt-8 text-center text-base text-gray-400">&copy; {new Date().getFullYear()} PUSCOM. All rights reserved.</p>
+        <p className="mt-8 text-center text-base">&copy; {new Date().getFullYear()} PUSCOM. All rights reserved.</p>
       </div>
     </footer>
   );
