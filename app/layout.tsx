@@ -75,7 +75,6 @@ export default function RootLayout({
             gtag('config', 'G-80DERZ2CNY');
           `}
         </Script>
-        <Script src="https://device.maxmind.com/js/device.js"></Script>
       </body>
     </html>
   );
