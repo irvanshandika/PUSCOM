@@ -5,7 +5,7 @@ import Footer from "@/src/components/Footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Servis",
+  title: "Formulir Pengajuan Service Perangkat",
 };
 
 function Service() {
