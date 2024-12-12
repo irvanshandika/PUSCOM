@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/src/components/ui/calendar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/src/components/ui/alert-dialog";
 import { db, storage } from "@/src/config/FirebaseConfig";
-import { ImagePlus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 
 const MDEditor = dynamic(() => import("@uiw/react-markdown-editor").then((mod) => mod.default), { ssr: false });
 
@@ -39,6 +39,7 @@ type ServiceFormData = z.infer<typeof serviceFormSchema> & {
 
 export function ServiceForm() {
   const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -55,13 +56,14 @@ export function ServiceForm() {
     defaultValues: {
       deviceType: "Laptop",
       date: new Date(),
+      images: [],
     },
   });
 
   const deviceType = watch("deviceType");
   const brand = watch("brand");
 
-  const validateImage = (file: File) => {
+  const validateImage = useCallback((file: File) => {
     const validTypes = ["image/jpeg", "image/png", "image/gif"];
     const maxSize = 5 * 1024 * 1024;
 
@@ -76,16 +78,21 @@ export function ServiceForm() {
     }
 
     return true;
-  };
+  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const validFiles = acceptedFiles.filter(validateImage);
+
       const newImages = [...images, ...validFiles].slice(0, 5);
+
       setImages(newImages);
       setValue("images", newImages);
+
+      const previews = newImages.map((file) => URL.createObjectURL(file));
+      setImagePreviews(previews);
     },
-    [images, setValue]
+    [images, setValue, validateImage]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -101,9 +108,20 @@ export function ServiceForm() {
 
   const removeImage = (index: number) => {
     const newImages = images.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+
     setImages(newImages);
+    setImagePreviews(newPreviews);
     setValue("images", newImages);
+
+    URL.revokeObjectURL(imagePreviews[index]);
   };
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(URL.revokeObjectURL);
+    };
+  }, [imagePreviews]);
 
   const onSubmit = async (data: ServiceFormData) => {
     setIsSubmitting(true);
@@ -128,11 +146,13 @@ export function ServiceForm() {
 
       toast.success("Pengajuan service berhasil!");
       setImages([]);
+      setImagePreviews([]);
       reset();
-      setIsSubmitting(false);
+      setShowConfirmDialog(false);
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Gagal mengirim pengajuan service");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -141,7 +161,6 @@ export function ServiceForm() {
     <div className="w-full max-w-4xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit(() => setShowConfirmDialog(true))} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Nama Lengkap */}
           <div className="space-y-2">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Nama Lengkap
@@ -150,7 +169,6 @@ export function ServiceForm() {
             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
 
-          {/* Nomor Telepon */}
           <div className="space-y-2">
             <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
               Nomor Telepon
@@ -160,7 +178,6 @@ export function ServiceForm() {
           </div>
         </div>
 
-        {/* Jenis Perangkat */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Jenis Perangkat</label>
           <Controller
@@ -253,20 +270,14 @@ export function ServiceForm() {
           </div>
         )}
 
-        {/* Deskripsi Kerusakan */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Deskripsi Kerusakan</label>
           <div className="w-full">
-            <Controller
-              name="damage"
-              control={control}
-              render={({ field }) => <MDEditor value={field.value} onChange={(value) => field.onChange(value)} height="200px" placeholder="Deskripsikan detail kerusakan" />}
-            />
+            <Controller name="damage" control={control} render={({ field }) => <MDEditor value={field.value} onChange={(value) => field.onChange(value)} height="200px" placeholder="Deskripsikan detail kerusakan" />} />
           </div>
           {errors.damage && <p className="text-red-500 text-sm">{errors.damage.message}</p>}
         </div>
 
-        {/* Upload Gambar */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">Foto Kerusakan</label>
           <div
@@ -288,10 +299,7 @@ export function ServiceForm() {
             {images.map((image, index) => (
               <div key={index} className="relative aspect-square">
                 <img src={URL.createObjectURL(image)} alt={`Upload ${index}`} className="w-full h-full object-cover rounded" />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-lg">
+                <button type="button" onClick={() => removeImage(index)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-lg">
                   X
                 </button>
               </div>
@@ -299,24 +307,17 @@ export function ServiceForm() {
           </div>
         </div>
 
-        {/* Tanggal Service */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">Tanggal Service</label>
           <div className="border rounded-lg p-4 w-full overflow-x-auto">
-            <Controller
-              name="date"
-              control={control}
-              render={({ field }) => <Calendar mode="single" selected={field.value} onSelect={(date) => field.onChange(date)} className="mx-auto" />}
-            />
+            <Controller name="date" control={control} render={({ field }) => <Calendar mode="single" selected={field.value} onSelect={(date) => field.onChange(date)} className="mx-auto" />} />
           </div>
         </div>
 
-        {/* Tombol Submit */}
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? "Mengirim..." : "Ajukan Service"}
         </Button>
 
-        {/* Error Validasi */}
         {Object.keys(errors).length > 0 && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
             <strong className="font-bold">Error Validasi: </strong>
@@ -331,7 +332,6 @@ export function ServiceForm() {
         )}
       </form>
 
-      {/* Konfirmasi Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent className="sm:max-w-[425px]">
           <AlertDialogHeader>
@@ -349,11 +349,5 @@ export function ServiceForm() {
     </div>
   );
 }
-
-ServiceForm.metadata = {
-  title: "Formulir Pengajuan Service Perangkat",
-  description: "Form komprehensif untuk pengajuan service elektronik",
-  keywords: ["service elektronik", "perbaikan laptop", "formulir service", "teknisi komputer"],
-};
 
 export default ServiceForm;
