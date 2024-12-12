@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
 import { getAuth, User, onAuthStateChanged } from "firebase/auth";
 import { app } from "@/src/config/FirebaseConfig";
+import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
 export default function ServicePage() {
   const [loadingAuth, setLoadingAuth] = useState(true);
@@ -71,8 +74,17 @@ export default function ServicePage() {
   return (
     <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
       <div className="max-w-2xl mx-auto">
+      <GoogleReCaptchaProvider
+      reCaptchaKey={RECAPTCHA_SITE_KEY}
+      scriptProps={{
+        async: false,
+        defer: false,
+        appendTo: "head",
+        nonce: undefined,
+      }}>
         <h1 className="text-3xl font-bold mb-6 text-center">Layanan Service Laptop & Komputer</h1>
         <ServiceForm />
+      </GoogleReCaptchaProvider>
       </div>
     </div>
   );
