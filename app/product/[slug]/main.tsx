@@ -116,24 +116,24 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
     }
   };
 
-  const handleShare = async () => {
-    // Cek apakah browser mendukung Web Share API
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: product?.name,
-          text: `Lihat produk ${product?.name} di toko kami!`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.error("Gagal berbagi:", error);
-        toast.error("Gagal berbagi produk");
-      }
-    } else {
-      // Fallback untuk browser yang tidak mendukung Web Share API
-      handleCopyLink();
-    }
-  };
+  // const handleShare = async () => {
+  //   // Cek apakah browser mendukung Web Share API
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share({
+  //         title: product?.name,
+  //         text: `Lihat produk ${product?.name} di toko kami!`,
+  //         url: window.location.href,
+  //       });
+  //     } catch (error) {
+  //       console.error("Gagal berbagi:", error);
+  //       toast.error("Gagal berbagi produk");
+  //     }
+  //   } else {
+  //     // Fallback untuk browser yang tidak mendukung Web Share API
+  //     handleCopyLink();
+  //   }
+  // };
 
   // Fungsi copy link
   const handleCopyLink = () => {
@@ -223,16 +223,10 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
             <Button variant="outline" size="icon">
               <Heart />
             </Button>
-            <Button variant="outline" size="icon" onClick={handleShare} title="Bagikan Produk">
-              {copied ? <Check className="text-green-500" /> : <Share2 />}
-            </Button>
-          </div>
-
-          <div className="mt-4">
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Share2 className="mr-2" /> Bagikan Produk
+                <Button variant="outline" size="icon">
+                  <Share2 />
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -244,7 +238,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
                   {[
                     {
                       name: "WhatsApp",
-                      icon: "https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg",
+                      icon: "https://api.iconify.design/logos:whatsapp-icon.svg",
                       shareUrl: (url: string) => `https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`,
                     },
                     {
