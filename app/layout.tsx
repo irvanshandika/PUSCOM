@@ -6,7 +6,7 @@ import Script from "next/script";
 
 export const metadata: Metadata = {
   title: {
-    default: "PUSCOM | Pusat Komputer Terpercaya di Yogyakarta",
+    default: "Pusat Komputer Terpercaya di Yogyakarta | PUSCOM",
     template: "%s | Jual Beli, Servis & Spare Part Komputer",
   },
   description: "Solusi Lengkap untuk Komputer & Laptop. Jual Beli, Servis Professional, dan Spare Part Berkualitas di Yogyakarta.",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: "https://puscom.web.id/",
     siteName: "PUSCOM",
-    title: "PUSCOM - Pusat Komputer Terpercaya di Yogyakarta",
+    title: "Pusat Komputer Terpercaya di Yogyakarta - PUSCOM",
     description: "Solusi Lengkap untuk Komputer & Laptop di Yogyakarta",
     images: [
       {
