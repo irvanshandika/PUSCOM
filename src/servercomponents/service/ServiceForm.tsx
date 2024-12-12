@@ -17,8 +17,10 @@ import { Calendar } from "@/src/components/ui/calendar";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/src/components/ui/alert-dialog";
 import { db, storage } from "@/src/config/FirebaseConfig";
 import { Upload } from "lucide-react";
-
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 const MDEditor = dynamic(() => import("@uiw/react-markdown-editor").then((mod) => mod.default), { ssr: false });
+
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
 const serviceFormSchema = z.object({
   name: z.string().min(2, "Nama lengkap harus diisi"),
@@ -42,6 +44,7 @@ export function ServiceForm() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
   const {
     control,
@@ -125,7 +128,26 @@ export function ServiceForm() {
 
   const onSubmit = async (data: ServiceFormData) => {
     setIsSubmitting(true);
+    if (!executeRecaptcha) {
+      toast.error("reCAPTCHA belum siap");
+      return;
+    }
     try {
+      const token = await executeRecaptcha("service_form");
+      const verifyResponse = await fetch("/api/recaptcha", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (!verifyData.success) {
+        throw new Error("reCAPTCHA verification failed");
+      }
+
       const imageUrls = await Promise.all(
         images.map(async (image) => {
           const storageRef = ref(storage, `service-images/${Date.now()}_${image.name}`);
@@ -150,6 +172,16 @@ export function ServiceForm() {
       reset();
       setShowConfirmDialog(false);
     } catch (error) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "reCAPTCHA verification failed":
+            toast.error("Verifikasi keamanan gagal. Silakan coba lagi.");
+            break;
+          default:
+            toast.error("Terjadi kesalahan saat mengirim pengajuan service");
+            break;
+        }
+      }
       console.error("Submission error:", error);
       toast.error("Gagal mengirim pengajuan service");
     } finally {
