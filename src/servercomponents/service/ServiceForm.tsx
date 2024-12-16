@@ -13,14 +13,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "react-hot-toast";
 import { X, Upload } from "lucide-react";
 import Image from "next/image";
-import { Editor } from "@tinymce/tinymce-react";
+import { Textarea } from "@/src/components/ui/textarea";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/components/ui/form";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-
-const TINYMCE_API_KEY = process.env.NEXT_PUBLIC_TINYMCE_API_KEY || "";
 
 const serviceRequestSchema = z.object({
   name: z.string().min(1, "Nama harus diisi"),
@@ -35,7 +33,7 @@ const serviceRequestSchema = z.object({
   computerTypes: z.enum(["All in One", "Gaming", "Desktop", "Mini PC", "Workstation"]).optional(),
   brand: z.enum(["Asus", "Acer", "Lenovo", "HP", "Dell", "Apple", "MSI", "Samsung", "Fujitsu", "LG", "Toshiba", "Razer", "Alienware", "Others"]).optional(),
   customBrand: z.string().optional(),
-  model: z.string().min(1, "Model harus diisi"),
+  model: z.string().optional(),
   damage: z.string().min(1, "Deskripsi kerusakan harus diisi"),
   date: z.string().min(1, "Tanggal service harus diisi"),
   images: z.array(z.string()),
@@ -329,6 +327,22 @@ export default function ServiceRequest() {
                         )}
                       />
                     )}
+
+                    {form.watch("deviceType") === "Laptop" && (
+                      <FormField
+                        control={form.control}
+                        name="model"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Model</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </div>
                 )}
               </div>
@@ -358,23 +372,7 @@ export default function ServiceRequest() {
                   </div>
                 )}
               </div>
-
-              {/* Model and Damage Description */}
               <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="model"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Model</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="damage"
@@ -382,27 +380,7 @@ export default function ServiceRequest() {
                     <FormItem>
                       <FormLabel>Deskripsi Kerusakan</FormLabel>
                       <FormControl>
-                        <Editor
-                          apiKey={TINYMCE_API_KEY}
-                          init={{
-                            height: 300,
-                            menubar: false,
-                            plugins: ["advlist", "autolink", "lists", "link", "image", "charmap", "preview", "anchor", "searchreplace", "visualblocks", "code", "fullscreen", "insertdatetime", "media", "table", "help", "wordcount"],
-                            toolbar: "undo redo | blocks | " + "bold italic | alignleft aligncenter " + "alignright alignjustify | bullist numlist outdent indent | " + "removeformat | help",
-                            content_style: `
-                              body { 
-                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                                font-size: 14px;
-                                line-height: 1.5;
-                                padding: 1rem;
-                              }
-                            `,
-                            skin: document.documentElement.classList.contains("dark") ? "oxide-dark" : "oxide",
-                            content_css: document.documentElement.classList.contains("dark") ? "dark" : "default",
-                          }}
-                          value={field.value}
-                          onEditorChange={field.onChange}
-                        />
+                        <Textarea {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -437,7 +415,7 @@ export default function ServiceRequest() {
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Data</AlertDialogTitle>
             <AlertDialogDescription>
-              Pastikan data yang Anda masukkan sudah benar:
+              <h1>Pastikan data yang Anda masukkan sudah benar:</h1>
               <div className="mt-4 space-y-2">
                 <p>Nama: {form.getValues("name")}</p>
                 <p>Nomor HP: {form.getValues("phoneNumber")}</p>
