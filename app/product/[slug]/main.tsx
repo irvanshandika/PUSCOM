@@ -116,25 +116,6 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
     }
   };
 
-  // const handleShare = async () => {
-  //   // Cek apakah browser mendukung Web Share API
-  //   if (navigator.share) {
-  //     try {
-  //       await navigator.share({
-  //         title: product?.name,
-  //         text: `Lihat produk ${product?.name} di toko kami!`,
-  //         url: window.location.href,
-  //       });
-  //     } catch (error) {
-  //       console.error("Gagal berbagi:", error);
-  //       toast.error("Gagal berbagi produk");
-  //     }
-  //   } else {
-  //     // Fallback untuk browser yang tidak mendukung Web Share API
-  //     handleCopyLink();
-  //   }
-  // };
-
   // Fungsi copy link
   const handleCopyLink = () => {
     if (product) {

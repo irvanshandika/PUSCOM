@@ -13,7 +13,7 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-12">
+      <div className="min-h-screen flex items-center justify-center px-4 py-12">
         <div className="text-center max-w-md">
           <div className="mb-8">
             <ServerCrash className="mx-auto text-red-500 dark:text-red-400 w-24 h-24" strokeWidth={1.5} />
