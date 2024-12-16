@@ -41,7 +41,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, setMessages, input, handleInputChange, handleSubmit, error, reload, isLoading } = useChat({
     keepLastMessageOnError: true,
-    api: "/api/chat/groq",
+    api: "/api/chat/gemini",
   });
 
   useEffect(() => {
