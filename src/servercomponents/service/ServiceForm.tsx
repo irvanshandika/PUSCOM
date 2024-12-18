@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/components/ui/form";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useRouter } from "next/navigation";
 
 const serviceRequestSchema = z.object({
   name: z.string().min(1, "Nama harus diisi"),
@@ -46,6 +47,7 @@ export default function ServiceRequest() {
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const route = useRouter();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
   const form = useForm<ServiceRequestSchema>({
@@ -145,6 +147,7 @@ export default function ServiceRequest() {
 
       // Reset form
       form.reset();
+      route.push(`/receipt/${serviceRef.id}`);
       setUploadedFiles([]);
       setPreviewUrls([]);
       setShowDialog(false);

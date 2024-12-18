@@ -86,25 +86,17 @@ body {
     @apply bg-background text-foreground;
   }
 }
-
-textarea {
-  transition: height 0.2s ease;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
+@media print {
+  @page {
+    margin: 20mm;
   }
-  50% {
-    opacity: 0.5;
+  
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-}
-
-.animation-delay-200 {
-  animation-delay: 200ms;
-}
-
-.animation-delay-400 {
-  animation-delay: 400ms;
+  
+  .print\:hidden {
+    display: none !important;
+  }
 }
