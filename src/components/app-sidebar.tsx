@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@/src/components/ui/sidebar";
-import { LayoutGrid, Users, Package } from "lucide-react";
+import { LayoutGrid, Users, Package, Computer } from "lucide-react";
 import Link from "next/link";
 
 const data = {
@@ -13,14 +13,19 @@ const data = {
       icon: LayoutGrid,
     },
     {
-      label: "Pengguna",
-      href: "/dashboard/users",
-      icon: Users,
-    },
-    {
       label: "Produk",
       href: "/dashboard/products",
       icon: Package,
+    },
+    {
+      label: "Servis",
+      href: "/dashboard/services",
+      icon: Computer,
+    },
+    {
+      label: "Pengguna",
+      href: "/dashboard/users",
+      icon: Users,
     },
   ],
 };
