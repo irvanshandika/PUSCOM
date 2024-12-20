@@ -5,10 +5,12 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
-import { Printer } from "lucide-react";
+import { ArrowLeftSquareIcon, Printer } from "lucide-react";
 import Image from "next/image";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface ServiceData {
   name: string;
@@ -32,6 +34,7 @@ export default function ServiceReceipt() {
   const params = useParams();
   const [serviceData, setServiceData] = useState<ServiceData | null>(null);
   const [loading, setLoading] = useState(true);
+  const route = useRouter();
 
   useEffect(() => {
     const fetchServiceData = async () => {
@@ -79,6 +82,9 @@ export default function ServiceReceipt() {
       <div className="max-w-[800px] mx-auto">
         {/* Print Button */}
         <div className="print:hidden mb-6 flex justify-end">
+          <Button onClick={() => route.push("/service-requests")} variant="outline" size="sm" className="mr-2">
+            <ArrowLeftSquareIcon className="w-4 h-4 mr-2" /> Kembali
+          </Button>
           <Button onClick={handlePrintPDF} variant="outline" size="sm">
             <Printer className="w-4 h-4 mr-2" />
             Simpan PDF
@@ -91,26 +97,22 @@ export default function ServiceReceipt() {
           <div className="border-b p-6 text-center">
             {/* Company Logo */}
             <div className="flex justify-center mb-4">
-              <div className="w-32 h-12 bg-primary/10 flex items-center justify-center rounded">
-                <span className="font-bold text-primary">LOGO</span>
-              </div>
+            <Link href="/" className="font-semibold flex items-center gap-x-2">
+            <div className="flex items-center -space-x-3">
+              <span className="h-6 aspect-square bg-blue-600 dark:bg-blue-500 rounded-full flex" />
+              <span className="h-6 aspect-square bg-pink-600 dark:bg-pink-400 blur rounded-full flex" />
             </div>
-            
+            <span className="text-lg text-gray-700">PUSCOM</span>
+          </Link>
+            </div>
+
             {/* Receipt Title */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Service Receipt
-            </h1>
-            
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Service Receipt</h1>
+
             {/* Receipt Details */}
             <div className="text-sm text-gray-600">
               <p className="font-medium">No. #{params.id}</p>
-              <p>
-                {format(
-                  new Date(serviceData.createdAt.seconds * 1000),
-                  "dd MMMM yyyy, HH:mm",
-                  { locale: id }
-                )}
-              </p>
+              <p>{format(new Date(serviceData.createdAt.seconds * 1000), "dd MMMM yyyy, HH:mm", { locale: id })}</p>
             </div>
           </div>
 
@@ -118,9 +120,7 @@ export default function ServiceReceipt() {
           <div className="p-6 space-y-8">
             {/* Customer Information */}
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
-                Informasi Pelanggan
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Informasi Pelanggan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm text-gray-600">Nama</label>
@@ -128,9 +128,7 @@ export default function ServiceReceipt() {
                 </div>
                 <div>
                   <label className="text-sm text-gray-600">Nomor HP</label>
-                  <p className="font-medium text-gray-900">
-                    {serviceData.phoneNumber}
-                  </p>
+                  <p className="font-medium text-gray-900">{serviceData.phoneNumber}</p>
                 </div>
                 <div className="md:col-span-2">
                   <label className="text-sm text-gray-600">Email</label>
@@ -141,40 +139,28 @@ export default function ServiceReceipt() {
 
             {/* Device Information */}
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
-                Informasi Perangkat
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Informasi Perangkat</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="text-sm text-gray-600">Jenis Perangkat</label>
-                  <p className="font-medium text-gray-900">
-                    {serviceData.deviceType}
-                  </p>
+                  <p className="font-medium text-gray-900">{serviceData.deviceType}</p>
                 </div>
                 {serviceData.computerTypes && (
                   <div>
                     <label className="text-sm text-gray-600">Tipe Komputer</label>
-                    <p className="font-medium text-gray-900">
-                      {serviceData.computerTypes}
-                    </p>
+                    <p className="font-medium text-gray-900">{serviceData.computerTypes}</p>
                   </div>
                 )}
                 {serviceData.brand && (
                   <div>
                     <label className="text-sm text-gray-600">Merek</label>
-                    <p className="font-medium text-gray-900">
-                      {serviceData.brand === "Others"
-                        ? serviceData.customBrand
-                        : serviceData.brand}
-                    </p>
+                    <p className="font-medium text-gray-900">{serviceData.brand === "Others" ? serviceData.customBrand : serviceData.brand}</p>
                   </div>
                 )}
                 {serviceData.model && (
                   <div>
                     <label className="text-sm text-gray-600">Model</label>
-                    <p className="font-medium text-gray-900">
-                      {serviceData.model}
-                    </p>
+                    <p className="font-medium text-gray-900">{serviceData.model}</p>
                   </div>
                 )}
               </div>
@@ -182,17 +168,11 @@ export default function ServiceReceipt() {
 
             {/* Service Information */}
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
-                Informasi Service
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Informasi Service</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="text-sm text-gray-600">
-                    Deskripsi Kerusakan
-                  </label>
-                  <p className="font-medium text-gray-900 whitespace-pre-wrap mt-1">
-                    {serviceData.damage}
-                  </p>
+                  <label className="text-sm text-gray-600">Deskripsi Kerusakan</label>
+                  <p className="font-medium text-gray-900 whitespace-pre-wrap mt-1">{serviceData.damage}</p>
                 </div>
                 <div>
                   <label className="text-sm text-gray-600">Tanggal Service</label>
@@ -208,22 +188,11 @@ export default function ServiceReceipt() {
             {/* Device Images */}
             {serviceData.images.length > 0 && (
               <section>
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">
-                  Foto Kerusakan
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Foto Kerusakan</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {serviceData.images.map((url, index) => (
-                    <div
-                      key={index}
-                      className="aspect-square relative rounded-lg overflow-hidden border"
-                    >
-                      <Image
-                        src={url}
-                        alt={`Damage ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 768px) 50vw, 33vw"
-                      />
+                    <div key={index} className="aspect-square relative rounded-lg overflow-hidden border">
+                      <Image src={url} alt={`Damage ${index + 1}`} fill className="object-cover" sizes="(max-width: 768px) 50vw, 33vw" />
                     </div>
                   ))}
                 </div>
@@ -232,15 +201,10 @@ export default function ServiceReceipt() {
 
             {/* Footer */}
             <footer className="text-center pt-8 border-t mt-8">
-              <p className="text-gray-600">
-                Terima kasih telah mempercayakan service perangkat Anda kepada kami
-              </p>
+              <p className="text-gray-600">Terima kasih telah mempercayakan service perangkat Anda kepada kami</p>
               <p className="text-gray-600 mt-2">
                 Jika ada pertanyaan, silakan hubungi kami di{" "}
-                <a
-                  href="tel:+6281234567890"
-                  className="text-primary hover:underline"
-                >
+                <a href="tel:+6281234567890" className="text-primary hover:underline">
                   0812-3456-7890
                 </a>
               </p>

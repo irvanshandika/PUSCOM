@@ -137,7 +137,7 @@ export default function ServiceRequest() {
 
       // Save to Firestore
       const serviceRef = collection(db, "service_requests");
-      await addDoc(serviceRef, {
+      const docRef = await addDoc(serviceRef, {
         ...data,
         images: imageUrls,
         createdAt: new Date(),
@@ -146,8 +146,8 @@ export default function ServiceRequest() {
       toast.success("Permintaan service berhasil dikirim!");
 
       // Reset form
+      route.push(`/receipt/${docRef.id}`);
       form.reset();
-      route.push(`/receipt/${serviceRef.id}`);
       setUploadedFiles([]);
       setPreviewUrls([]);
       setShowDialog(false);
