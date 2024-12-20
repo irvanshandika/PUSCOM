@@ -13,6 +13,7 @@ const generateBreadcrumbs = (pathname: string) => {
   const breadcrumbMapping: { [key: string]: string } = {
     dashboard: "Dashboard",
     users: "Dashboard Pengguna",
+    services: "Dashboard Servis",
     products: "Dashboard Produk",
   };
 

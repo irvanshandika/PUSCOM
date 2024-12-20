@@ -82,7 +82,7 @@ export default function ServiceReceipt() {
       <div className="max-w-[800px] mx-auto">
         {/* Print Button */}
         <div className="print:hidden mb-6 flex justify-end">
-          <Button onClick={() => route.push("/service-requests")} variant="outline" size="sm" className="mr-2">
+          <Button onClick={() => route.push("/service")} variant="outline" size="sm" className="mr-2">
             <ArrowLeftSquareIcon className="w-4 h-4 mr-2" /> Kembali
           </Button>
           <Button onClick={handlePrintPDF} variant="outline" size="sm">
