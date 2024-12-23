@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: {
@@ -62,6 +63,7 @@ export default function RootLayout({
         <meta name="google-site-verification" content="OJGaC9hOIiPX7zJ1nmCKlPbHQ656ytp6atR4V_F8obc" />
       </head>
       <body className="antialiased font-adobe-clean">
+        <SpeedInsights />
         <Analytics />
         <Toaster position="top-right" />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
