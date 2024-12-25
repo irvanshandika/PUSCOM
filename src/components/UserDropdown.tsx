@@ -18,7 +18,7 @@ export default function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="rounded-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800">
+        <Button variant="outline" size="icon" className="rounded-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800" aria-label="Dropdown User">
           <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
         </Button>
       </DropdownMenuTrigger>
