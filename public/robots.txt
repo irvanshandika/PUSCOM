@@ -1,3 +1,0 @@
-# robots.txt
-User-agent: *
-Sitemap: https://puscom.web.id/sitemap.xml
