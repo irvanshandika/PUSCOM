@@ -70,17 +70,25 @@ export default function ProfileDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-neutral-700" />
 
-        {[
-          { icon: User, text: "Profile", path: "/profile" },
-          { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
-          { icon: History, text: "Riwayat", path: "/history" },
-          { icon: Settings, text: "Pengaturan", path: "/settings" },
-        ].map((item, index) => (
-          <DropdownMenuItem key={index} onClick={() => router.push(item.path)} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
-            <item.icon className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
-            <span className="text-sm text-gray-800 dark:text-gray-200">{item.text}</span>
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuItem onClick={() => router.push("/profile")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
+          <User className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-sm text-gray-800 dark:text-gray-200">Profile</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => router.push("/dashboard")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
+          <LayoutDashboard className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-sm text-gray-800 dark:text-gray-200">Dashboard</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => router.push("/history")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
+          <History className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-sm text-gray-800 dark:text-gray-200">Riwayat</span>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => router.push("/settings")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
+          <Settings className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
+          <span className="text-sm text-gray-800 dark:text-gray-200">Pengaturan</span>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-neutral-700" />
 

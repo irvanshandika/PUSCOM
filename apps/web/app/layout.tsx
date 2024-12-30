@@ -69,6 +69,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
         </ThemeProvider>
+        <Script async src="https://kit.fontawesome.com/c7e6574aa8.js" crossOrigin="anonymous"></Script>
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-80DERZ2CNY" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
