@@ -15,6 +15,7 @@ const generateBreadcrumbs = (pathname: string) => {
     users: "Dashboard Pengguna",
     services: "Dashboard Servis",
     products: "Dashboard Produk",
+    contacts: "Dashboard Kontak"
   };
 
   return pathSegments.map((segment, index) => {

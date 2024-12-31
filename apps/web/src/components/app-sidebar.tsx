@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from "@repo/ui/components/ui/sidebar";
-import { LayoutGrid, Users, Package, Computer } from "lucide-react";
+import { LayoutGrid, Users, Package, Computer, Phone } from "lucide-react";
 import Link from "next/link";
 
 const data = {
@@ -27,6 +27,11 @@ const data = {
       href: "/dashboard/users",
       icon: Users,
     },
+    {
+      label: "Kontak",
+      href: "/dashboard/contacts",
+      icon: Phone,
+    }
   ],
 };
 
