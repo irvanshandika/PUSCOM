@@ -140,7 +140,6 @@ export default function AddProductDialog({ open, onClose, onSubmit }: AddProduct
 
       await onSubmit(productData);
 
-      toast.success("Produk berhasil ditambahkan");
       resetForm();
     } catch (error) {
       console.error("Error uploading product:", error);
