@@ -157,44 +157,52 @@ export default function ProductDashboard() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <div key={product.id} className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold dark:text-white">{product.name}</h2>
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => openEditDialog(product)}>
-                    <Edit size={20} />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="icon">
-                        <Trash2 size={20} />
+          {products && products.length === 0 ? (
+            <>
+              <p className="text-lg font-semibold dark:text-white">Belum ada produk</p>
+            </>
+          ) : (
+            <>
+              {products.map((product) => (
+                <div key={product.id} className="bg-white dark:bg-neutral-800 rounded-lg shadow-md p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold dark:text-white">{product.name}</h2>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={() => openEditDialog(product)}>
+                        <Edit size={20} />
                       </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Hapus Produk</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Apakah Anda yakin ingin menghapus produk <strong>{product.name}</strong>? Tindakan ini tidak dapat dibatalkan.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteProduct(product.id!)} className="bg-red-600 hover:bg-red-700">
-                          Hapus
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="icon">
+                            <Trash2 size={20} />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Hapus Produk</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Apakah Anda yakin ingin menghapus produk <strong>{product.name}</strong>? Tindakan ini tidak dapat dibatalkan.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Batal</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteProduct(product.id!)} className="bg-red-600 hover:bg-red-700">
+                              Hapus
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                  <div className="space-y-2 dark:text-neutral-300">
+                    <p>Category: {product.category}</p>
+                    <p>Price: Rp {product.price.toLocaleString()}</p>
+                    <p>Stock: {product.stock}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="space-y-2 dark:text-neutral-300">
-                <p>Category: {product.category}</p>
-                <p>Price: Rp {product.price.toLocaleString()}</p>
-                <p>Stock: {product.stock}</p>
-              </div>
-            </div>
-          ))}
+              ))}
+            </>
+          )}
         </div>
 
         <AddProductDialog open={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)} onSubmit={handleAddProduct} />
