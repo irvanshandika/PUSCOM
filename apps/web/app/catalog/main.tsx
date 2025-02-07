@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { collection, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
@@ -133,7 +132,7 @@ export default function CatalogMain() {
             <SelectValue placeholder="Kategori" />
           </SelectTrigger>
           <SelectContent>
-            {["Elektronik", "Fashion", "Olahraga", "Lainnya"].map((category) => (
+            {["Laptop", "Komputer", "Spare Part"].map((category) => (
               <SelectItem key={category} value={category}>
                 {category}
               </SelectItem>
