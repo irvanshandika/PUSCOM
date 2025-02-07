@@ -56,7 +56,7 @@ export default function SignInPage() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
 
       toast.dismiss(loadingToast);
-      toast.success("Berhasil masuk!");
+      toast.success(`Selamat datang, ${data.email}!`);
       router.push("/");
     } catch (error: any) {
       toast.dismiss(loadingToast);

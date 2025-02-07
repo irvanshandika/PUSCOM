@@ -1,240 +1,209 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+"use client"
 import React, { useState } from "react";
-import Link from "next/link";
-import { Button } from "@repo/ui/components/ui/button";
-import { Input } from "@repo/ui/components/ui/input";
-import { Label } from "@repo/ui/components/ui/label";
-import { toast } from "react-hot-toast";
-import { Eye, EyeOff, Lock, Mail, User, ArrowRight, CheckCircle2 } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signUpSchema, SignUpFormData } from "@/src/schema/SignUpSchema";
-import { PasswordStrengthIndicator } from "@/src/components/PasswordStrengthIndicator";
-import { FcGoogle } from "react-icons/fc";
-import bcrypt from "bcryptjs";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db, auth } from "@/src/config/FirebaseConfig";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { app } from "@/src/config/FirebaseConfig";
+import Link from "next/link";
 
-export default function SignUpForm() {
-  const router = useRouter();
+const SignUpPage = () => {
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const googleProvider = new GoogleAuthProvider();
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<SignUpFormData>({
-    resolver: zodResolver(signUpSchema),
+  const route = useRouter();
+  const [formData, setFormData] = useState({
+    displayName: "",
+    email: "",
+    password: "",
   });
+  const [error, setError] = useState("");
 
-  const checkEmailExists = async (email: string) => {
-    try {
-      const userRef = doc(db, "users", email);
-      const userSnap = await getDoc(userRef);
-      return userSnap.exists();
-    } catch (error) {
-      console.error("Error checking email:", error);
-      return false;
-    }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const onSubmit = async (data: SignUpFormData) => {
+  const handleCredentialSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
     try {
-      const emailExistsQuery = await getDocs(query(collection(db, "users"), where("email", "==", data.email)));
-
-      if (!emailExistsQuery.empty) {
-        toast.error(`Maaf, email ${data.email} sudah terdaftar.`);
-        return;
-      }
-
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(data.password, salt);
-
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
 
       await updateProfile(userCredential.user, {
-        displayName: data.name,
+        displayName: formData.displayName,
+        photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.displayName)}&background=random`,
       });
 
       await setDoc(doc(db, "users", userCredential.user.uid), {
         uid: userCredential.user.uid,
-        displayName: data.name,
-        email: data.email,
+        displayName: formData.displayName,
+        email: formData.email,
         signType: "credential",
+        photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.displayName)}&background=random`,
         roles: "user",
-        hashedPassword: hashedPassword,
-        createdAt: new Date(),
-        photoURL: data.photoURL,
-        phoneNumber: data.phoneNumber,
+        status: "active",
+        createdAt: new Date().toISOString(),
       });
 
-      toast.success("Akun berhasil dibuat!");
-      router.push("/");
-    } catch (error: any) {
-      console.error("Registrasi Gagal", error);
-      toast.error("Gagal membuat akun. Silakan coba lagi.");
+      toast.success("Account created successfully");
+      route.push("/");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
 
-      const emailExistsQuery = await getDocs(query(collection(db, "users"), where("email", "==", user.email)));
-
-      if (!emailExistsQuery.empty) {
-        toast.error(`Maaf, email ${user.email} sudah terdaftar.`);
-        await auth.signOut();
-        return;
-      }
-
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        displayName: user.displayName || "Pengguna Google",
-        email: user.email,
+      await setDoc(doc(db, "users", result.user.uid), {
+        uid: result.user.uid,
+        displayName: result.user.displayName,
+        email: result.user.email,
         signType: "google",
+        photoUrl: result.user.photoURL,
         roles: "user",
-        createdAt: new Date(),
-        photoURL: user.photoURL,
-        phoneNumber: user.phoneNumber,
+        status: "active",
+        createdAt: new Date().toISOString(),
       });
 
-      toast.success("Akun Google berhasil dibuat!");
-      router.push("/");
-    } catch (error: any) {
-      console.error("Google Sign Up Gagal", error);
-      toast.error("Gagal mendaftar dengan Google");
+      toast.success(`Welcome ${result.user.displayName}`);
+      route.push("/");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const passwordValue = watch("password") || "";
-
   return (
-    <>
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Buat Akun Baru</h1>
-        <p className="text-gray-600 dark:text-gray-300">Daftar di PUSCOM untuk pengalaman lebih baik</p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <Label className="block mb-2 text-gray-700 dark:text-gray-300">Name</Label>
-          <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-400 dark:text-gray-500" />
-            <Input required placeholder="Masukkin Nama" className="pl-10" {...register("name")} />
-          </div>
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-neutral-950 px-4">
+      <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Create Account</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Join PUSCOM to get started with our services</p>
         </div>
 
-        <div>
-          <Label className="block mb-2 text-gray-700 dark:text-gray-300">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-400 dark:text-gray-500" />
-            <Input required type="email" placeholder="Masukkan email" className="pl-10" {...register("email")} />
-          </div>
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
-        </div>
+        {/* Error Message */}
+        {error && <div className="bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 p-3 rounded-lg text-sm">{error}</div>}
 
-        <div>
-          <Label className="block mb-2 text-gray-700 dark:text-gray-300">Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-400 dark:text-gray-500" />
-            <Input required type={showPassword ? "text" : "password"} placeholder="Buat password" className="pl-10 pr-12" {...register("password")} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400 hover:text-gray-600  dark:text-gray-500 dark:hover:text-gray-300">
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        {/* Sign Up Form */}
+        <form onSubmit={handleCredentialSignUp} className="space-y-6">
+          <div>
+            <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Full Name
+            </label>
+            <input
+              id="displayName"
+              name="displayName"
+              type="text"
+              required
+              value={formData.displayName}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 
+              focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="John Doe"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 
+              focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="john@example.com"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Password
+            </label>
+            <div className="mt-1 relative">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={formData.password}
+                onChange={handleInputChange}
+                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 
+                focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                placeholder="••••••••"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+              bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign up"}
             </button>
           </div>
-          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+        </form>
 
-          <PasswordStrengthIndicator password={passwordValue} />
-
-          <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center">
-              <CheckCircle2 className={`mr-2 h-4 w-4 ${passwordValue.length >= 8 ? "text-green-500" : "text-gray-300"}`} />
-              Minimal 8 karakter
-            </div>
-            <div className="flex items-center">
-              <CheckCircle2 className={`mr-2 h-4 w-4 ${/[A-Z]/.test(passwordValue) ? "text-green-500" : "text-gray-300"}`} />
-              Mengandung huruf besar
-            </div>
-            <div className="flex items-center">
-              <CheckCircle2 className={`mr-2 h-4 w-4 ${/[a-z]/.test(passwordValue) ? "text-green-500" : "text-gray-300"}`} />
-              Mengandung huruf kecil
-            </div>
-            <div className="flex items-center">
-              <CheckCircle2 className={`mr-2 h-4 w-4 ${/[0-9]/.test(passwordValue) ? "text-green-500" : "text-gray-300"}`} />
-              Mengandung angka
-            </div>
+        {/* Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">Or continue with</span>
           </div>
         </div>
 
-        <div>
-          <Label className="block mb-2 text-gray-700 dark:text-gray-300">Konfirmasi Password</Label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2  text-gray-400 dark:text-gray-500" />
-            <Input required type={showConfirmPassword ? "text" : "password"} placeholder="Ulangi password" className="pl-10 pr-12" {...register("confirmPassword")} />
-            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2  text-gray-400 hover:text-gray-600  dark:text-gray-500 dark:hover:text-gray-300">
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
-          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
-        </div>
+        {/* Google Sign Up */}
+        <button
+          onClick={handleGoogleSignUp}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+          shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
+          <svg className="h-5 w-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+          </svg>
+          Google
+        </button>
 
-        <div className="flex items-center">
-          <input type="checkbox" id="terms" className="mr-2 rounded text-blue-600 focus:ring-blue-500" required />
-          <label htmlFor="terms" className="text-sm text-gray-600 dark:text-gray-300">
-            Saya menyetujui{" "}
-            <Link href="/terms" className="text-blue-600 hover:underline dark:text-blue-400">
-              Syarat & Ketentuan
-            </Link>
-          </label>
-        </div>
-
-        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700  dark:bg-blue-500 dark:hover:bg-blue-600" disabled={isSubmitting}>
-          {isSubmitting ? "Mendaftarkan..." : "Daftar Sekarang"}
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </form>
-
-      <div className="text-center mt-6">
-        <p className="text-gray-600 dark:text-gray-300">
-          Sudah punya akun?{" "}
-          <Link href="/auth/signin" className="text-blue-600 hover:underline  dark:text-blue-400">
-            Masuk Sekarang
+        {/* Sign In Link */}
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+          Already have an account?{" "}
+          <Link href="/auth/signin" className="font-medium text-blue-600 hover:text-blue-500">
+            Sign in
           </Link>
         </p>
       </div>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gray-300 dark:border-gray-700"></span>
-        </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-white dark:bg-gray-800 px-2 text-gray-500 dark:text-gray-400">Atau Daftar Dengan</span>
-        </div>
-      </div>
-
-      <div className="flex justify-center items-center">
-        <Button variant="outline" className="w-full flex items-center justify-center" onClick={handleGoogleSignUp}>
-          <FcGoogle className="h-5 w-5 mr-2" />
-          Google
-        </Button>
-      </div>
-
-      <div className="mt-6 text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">Informasi Anda dilindungi dengan enkripsi 256-bit</p>
-      </div>
-    </>
+    </div>
   );
-}
+};
+
+export default SignUpPage;

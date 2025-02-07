@@ -59,8 +59,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preload" href="https://use.typekit.net/hah7vzn.css" />
         <meta name="google-site-verification" content="OJGaC9hOIiPX7zJ1nmCKlPbHQ656ytp6atR4V_F8obc" />
+        <link rel="preload" href="https://use.typekit.net/hah7vzn.css" />
       </head>
       <body className="antialiased font-adobe-clean">
         <SpeedInsights />
