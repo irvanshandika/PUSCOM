@@ -72,7 +72,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
 
         const productDoc = querySnapshot.docs[0];
         const productData = {
-          id: productDoc?.id || '',
+          id: productDoc?.id || "",
           ...productDoc?.data(),
         } as Product;
 
@@ -139,7 +139,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
         <div className="grid md:grid-cols-2 gap-8">
           <Skeleton className="w-full aspect-square" />
           <div className="space-y-4">
@@ -294,7 +294,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
             {relatedProducts.map((relatedProduct) => (
               <Link key={relatedProduct.id} href={`/product/${relatedProduct.slug}`} className="group">
                 <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
-                  <Image src={relatedProduct.images[0] || ''} alt={relatedProduct.name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                  <Image src={relatedProduct.images[0] || ""} alt={relatedProduct.name} fill className="object-cover group-hover:scale-105 transition-transform" />
                 </div>
                 <h3 className="text-lg font-semibold truncate">{relatedProduct.name}</h3>
                 <p className="text-gray-600">Rp {relatedProduct.price.toLocaleString()}</p>
