@@ -181,7 +181,7 @@ export default function CatalogMain() {
               </div>
               <h3 className="text-sm font-medium truncate">{product.name}</h3>
               <div className="flex justify-between items-center text-sm">
-                <p className="text-gray-900 font-semibold">Rp {product.price.toLocaleString()}</p>
+                <p className="font-semibold">Rp {product.price.toLocaleString()}</p>
                 <span className="text-green-600">Stok: {product.stock}</span>
               </div>
             </Link>
