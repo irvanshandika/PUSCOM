@@ -103,7 +103,7 @@ export default function Chat() {
           <RobotIcon className="size-32" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] h-[600px] flex flex-col p-0">
+      <DialogContent className="lg:max-w-[60vw] sm:max-w-[425px] h-[600px] flex flex-col p-0">
         <DialogHeader className="px-4 py-2 border-b flex flex-row justify-between items-center">
           <DialogTitle>Chat dengan AI</DialogTitle>
         </DialogHeader>
@@ -142,13 +142,16 @@ export default function Chat() {
             </div>
           )}
           {isLoading && (
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <div className="animate-pulse flex items-center justify-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <div className="h-2 w-2 rounded-full bg-blue-500 animation-delay-200"></div>
-                <div className="h-2 w-2 rounded-full bg-blue-500 animation-delay-400"></div>
+            <>
+              <div className="text-center text-gray-500 dark:text-gray-400">
+                <div className="animate-pulse flex items-center justify-left gap-2">
+                  <h1>Thinking</h1>
+                  <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animation-delay-200"></div>
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animation-delay-400"></div>
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
 
@@ -190,6 +193,14 @@ export default function Chat() {
               </div>
             </div>
           </div>
+            <p>
+              <span className="text-sm text-gray-500">
+                Powered by{" "}
+                <a href="https://ai.google.dev/docs/gemini_api_overview" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                  Gemini AI
+                </a>
+              </span>
+            </p>
         </form>
       </DialogContent>
     </Dialog>

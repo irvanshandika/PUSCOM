@@ -70,11 +70,6 @@ export default function ProfileDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="my-2 bg-gray-200 dark:bg-neutral-700" />
 
-        <DropdownMenuItem onClick={() => router.push("/profile")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
-          <User className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
-          <span className="text-sm text-gray-800 dark:text-gray-200">Profile</span>
-        </DropdownMenuItem>
-
         <DropdownMenuItem onClick={() => router.push("/dashboard")} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">
           <LayoutDashboard className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-300" />
           <span className="text-sm text-gray-800 dark:text-gray-200">Dashboard</span>

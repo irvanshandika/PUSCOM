@@ -66,6 +66,13 @@ export default function ServiceRequest() {
     },
   });
 
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0'); // Hari (2 digit)
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan (2 digit, Januari = 0)
+    const year = date.getFullYear(); // Tahun (4 digit)
+    return `${day}-${month}-${year}`; // Format DD-MM-YYYY
+  };
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (previewUrls.length + acceptedFiles.length > 5) {
@@ -129,7 +136,6 @@ export default function ServiceRequest() {
       }
       const imageUrls: string[] = [];
 
-      // Upload images to Firebase Storage
       for (const file of uploadedFiles) {
         const storageRef = ref(storage, `service-requests/${Date.now()}-${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
@@ -137,12 +143,12 @@ export default function ServiceRequest() {
         imageUrls.push(url);
       }
 
-      // Save to Firestore
       const serviceRef = collection(db, "service_requests");
+      const createdAtFormatted = formatDate(new Date());
       const docRef = await addDoc(serviceRef, {
         ...data,
         images: imageUrls,
-        createdAt: new Date(),
+        createdAt: createdAtFormatted,
       });
 
       toast.success("Permintaan service berhasil dikirim!");

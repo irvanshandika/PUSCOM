@@ -9,7 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 export const metadata: Metadata = {
   title: {
     default: "Pusat Komputer Terpercaya di Yogyakarta | PUSCOM",
-    template: "%s | Jual Beli, Servis & Spare Part Komputer",
+    template: "%s | PUSCOM",
   },
   description: "Solusi Lengkap untuk Komputer & Laptop. Jual Beli, Servis Professional, dan Spare Part Berkualitas di Yogyakarta.",
   keywords: ["jual beli komputer", "laptop yogyakarta", "servis komputer", "spare part komputer", "toko komputer terpercaya"],

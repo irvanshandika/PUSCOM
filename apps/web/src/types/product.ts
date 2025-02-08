@@ -1,4 +1,5 @@
 export interface Product {
+  image: string;
   id: string;
   name: string;
   category: "Komputer" | "Laptop" | "Spare Part";
