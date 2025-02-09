@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -20,6 +20,13 @@ const SignUpPage = () => {
   });
   const [error, setError] = useState("");
 
+  const formatDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, "0"); // Hari (2 digit)
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Bulan (2 digit, Januari = 0)
+    const year = date.getFullYear(); // Tahun (4 digit)
+    return `${day}-${month}-${year}`; // Format DD-MM-YYYY
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -34,6 +41,7 @@ const SignUpPage = () => {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      const createdAtFormatted = formatDate(new Date());
 
       await updateProfile(userCredential.user, {
         displayName: formData.displayName,
@@ -45,10 +53,10 @@ const SignUpPage = () => {
         displayName: formData.displayName,
         email: formData.email,
         signType: "credential",
-        photoUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.displayName)}&background=random`,
+        photoURL: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.displayName)}&background=random`,
         roles: "user",
         status: "active",
-        createdAt: new Date().toISOString(),
+        createdAt: createdAtFormatted,
       });
 
       toast.success("Account created successfully");
@@ -66,6 +74,7 @@ const SignUpPage = () => {
 
     try {
       const provider = new GoogleAuthProvider();
+      const createdAtFormatted = formatDate(new Date());
       const result = await signInWithPopup(auth, provider);
 
       await setDoc(doc(db, "users", result.user.uid), {
@@ -76,7 +85,7 @@ const SignUpPage = () => {
         photoUrl: result.user.photoURL,
         roles: "user",
         status: "active",
-        createdAt: new Date().toISOString(),
+        createdAt: createdAtFormatted,
       });
 
       toast.success(`Welcome ${result.user.displayName}`);
