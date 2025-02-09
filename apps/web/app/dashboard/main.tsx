@@ -4,9 +4,9 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/src/config/FirebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
-import TotalUsers from "@/src/servercomponents/dashboard/dashboard/TotalUsers";
-import TotalServices from "@/src/servercomponents/dashboard/dashboard/TotalServices";
+import ChartServicesComponent from "@/src/components/ChartServicesComponent";
 import TotalProducts from "@/src/servercomponents/dashboard/dashboard/TotalProducts";
+import TotalUsers from "@/src/servercomponents/dashboard/dashboard/TotalUsers";
 
 const activities = [
   {
@@ -77,9 +77,9 @@ function DashboardPage() {
             </header>
 
             <div className="space-y-8">
+              {/* Total Servis */}
+              <ChartServicesComponent />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Konsultasi */}
-                <TotalServices />
                 {/* Total pengguna */}
                 <TotalUsers />
                 {/* Total Produk */}

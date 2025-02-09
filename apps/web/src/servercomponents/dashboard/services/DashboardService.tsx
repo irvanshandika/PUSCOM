@@ -16,7 +16,6 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
 import { MoreHorizontal } from "lucide-react";
-import ChartServicesComponent from "@/src/components/ChartServicesComponent";
 
 export default function ServiceDashboardPage() {
   const [services, setServices] = useState<ServiceRequest[]>([]);
@@ -150,11 +149,6 @@ export default function ServiceDashboardPage() {
             <CardTitle>Dashboard Service</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-8 mb-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <ChartServicesComponent />
-              </div>
-            </div>
             <Tabs defaultValue="active" className="space-y-4">
               <TabsList>
                 <TabsTrigger value="active">Active</TabsTrigger>
