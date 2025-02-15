@@ -164,6 +164,7 @@ export default function UserManagementDashboard() {
                         <SelectContent>
                           <SelectItem value="user">User</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="teknisi">Teknisi</SelectItem>
                         </SelectContent>
                       </Select>
                     </TableCell>
