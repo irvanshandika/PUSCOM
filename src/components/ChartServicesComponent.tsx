@@ -3,9 +3,9 @@
 import * as React from "react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
-import {  ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/src/components/ui/chart";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/src/components/ui/chart";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
-import { collection, getDocs, query,  orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
 
 const chartConfig = {
@@ -20,7 +20,7 @@ const chartConfig = {
 };
 
 export default function ChartServicesComponent() {
-  const [timeRange, setTimeRange] = React.useState("90d");
+  const [timeRange, setTimeRange] = React.useState("365d");
   const [chartData, setChartData] = React.useState<any[]>([]);
 
   // Fetch service requests and process data
@@ -67,7 +67,10 @@ export default function ChartServicesComponent() {
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
     const referenceDate = new Date();
-    let daysToSubtract = 90;
+    let daysToSubtract = 365;
+    if (timeRange === "90d") {
+      daysToSubtract = 90;
+    }
     if (timeRange === "30d") {
       daysToSubtract = 30;
     } else if (timeRange === "7d") {
@@ -90,6 +93,9 @@ export default function ChartServicesComponent() {
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
+            <SelectItem value="365d" className="rounded-lg">
+              Last year
+            </SelectItem>
             <SelectItem value="90d" className="rounded-lg">
               Last 3 months
             </SelectItem>
