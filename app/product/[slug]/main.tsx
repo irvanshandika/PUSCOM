@@ -139,7 +139,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
         <div className="grid md:grid-cols-2 gap-8">
           <Skeleton className="w-full aspect-square" />
           <div className="space-y-4">

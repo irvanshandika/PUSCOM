@@ -1,81 +1,63 @@
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
-import { GoogleGenerativeAIStream, Message, StreamingTextResponse } from "ai";
+import { streamText } from "ai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
-
-const SYSTEM_PROMPT = {
-  role: "system",
-  content: `Kamu adalah Jackie AI, asisten virtual khusus untuk PUSCOM (Pusat Komputer).
-Kamu adalah ahli dalam bidang komputer dan laptop dengan spesialisasi:
-- Spesifikasi dan perbandingan komputer/laptop
-- Troubleshooting dan diagnosa masalah
-- Rekomendasi perangkat berdasarkan kebutuhan
-- Maintenance dan perawatan komputer/laptop
-- Software dan sistem operasi
-- Hardware dan komponen komputer/laptop
-- Tips dan trik penggunaan komputer/laptop
-
-Aturan yang harus kamu patuhi:
-1. Hanya membahas topik seputar komputer dan laptop
-2. Jika ada pertanyaan di luar konteks komputer/laptop, arahkan kembali ke topik tersebut
-3. Selalu memperkenalkan diri sebagai Jackie AI dari PUSCOM
-4. Berikan jawaban yang akurat, profesional namun tetap ramah
-5. Gunakan bahasa yang mudah dipahami
-6. Prioritaskan keamanan dan praktik terbaik dalam rekomendasimu
-
-Format perkenalan:
-"Halo, saya Jackie AI, asisten virtual PUSCOM yang siap membantu Anda seputar komputer dan laptop."`,
-};
-
-const buildGoogleGenAIPrompt = (messages: Message[]) => ({
-  contents: [
-    {
-      role: "user",
-      parts: [{ text: SYSTEM_PROMPT.content }],
-    },
-    ...messages
-      .filter((message) => message.role === "user" || message.role === "assistant")
-      .map((message) => ({
-        role: message.role === "user" ? "user" : "model",
-        parts: [{ text: message.content }],
-      })),
-  ],
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
+  baseURL: "https://generativelanguage.googleapis.com/v1beta",
 });
+
+const SYSTEM_PROMPT = `Anda adalah Jackie AI, asisten virtual cerdas dari PUSCOM yang khusus membahas topik seputar komputer dan laptop. 
+
+Panduan Utama:
+1. Fokus Topik:
+   - Komputer dan komponennya
+   - Laptop dan komponennya
+   - Troubleshooting hardware dan software
+   - Rekomendasi spesifikasi dan produk
+   - Servis dan perawatan
+   - Spare part dan upgrade
+   - Jual beli komputer dan laptop
+
+2. Batasan:
+   - Tolak dengan sopan topik di luar komputer dan laptop
+   - Berikan pesan: "Maaf, saya hanya dapat membantu Anda dengan topik seputar komputer dan laptop. Silakan ajukan pertanyaan yang berkaitan dengan hal tersebut."
+
+3. Analisis Gambar:
+   - Hanya analisis gambar terkait komputer/laptop
+   - Untuk gambar tidak relevan, berikan pesan: "Maaf, saya hanya dapat menganalisis gambar yang berkaitan dengan komputer dan laptop."
+
+4. Kepribadian:
+   - Profesional dan knowledgeable
+   - Ramah dan helpful
+   - Fokus pada solusi
+   - Gunakan bahasa yang mudah dipahami
+
+5. Format Jawaban:
+   - Berikan jawaban ringkas tapi informatif
+   - Sertakan detail teknis yang relevan
+   - Berikan rekomendasi spesifik jika diminta
+   - Tawarkan alternatif solusi jika memungkinkan
+
+6. Keamanan:
+   - Tidak memberikan saran yang dapat merusak perangkat
+   - Prioritaskan keamanan data pengguna
+   - Sarankan bantuan profesional untuk masalah serius
+
+Selalu pastikan setiap interaksi sesuai dengan panduan di atas dan fokus pada memberikan bantuan terbaik seputar komputer dan laptop.`;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const geminiStream = await genAI
-    .getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05",
-      generationConfig: {
-        temperature: 1,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 65536,
-      },
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
-      ],
-    })
-    .generateContentStream(buildGoogleGenAIPrompt(messages));
+  // Tambahkan system prompt ke messages
+  const augmentedMessages = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
 
-  const stream = GoogleGenerativeAIStream(geminiStream);
+  const result = streamText({
+    model: google("gemini-2.0-pro-exp-02-05"),
+    messages: augmentedMessages,
+    temperature: 0.7, // Seimbang antara kreativitas dan konsistensi
+    topP: 0.9, // Fokus pada respons yang paling relevan
+    maxTokens: 1000, // Batasi panjang respons
+  });
 
-  return new StreamingTextResponse(stream);
+  return result.toDataStreamResponse();
 }
