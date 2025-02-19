@@ -1,5 +1,4 @@
 "use client";
-
 import { useChat } from "@ai-sdk/react";
 import type React from "react";
 import { useRef, useState, useEffect, type KeyboardEvent } from "react";
@@ -13,6 +12,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/sr
 import { Textarea } from "@/src/components/ui/textarea";
 import { cn } from "@/src/lib/utils";
 import RobotIcon from "./icons/RobotIcon";
+import PersonIcon from "./icons/PersonIcon";
+import DocsIcon from "./icons/DocsIcon";
 
 const md = new MarkdownIt();
 
@@ -69,7 +70,7 @@ export default function Chat() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="icon" className="fixed bottom-4 right-4 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow">
+        <Button variant="secondary" aria-label="Chat Bot" size="icon" className="fixed bottom-4 right-4 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow">
           <RobotIcon className="size-32" />
         </Button>
       </SheetTrigger>
@@ -90,6 +91,10 @@ export default function Chat() {
             {messages.map((m) => (
               <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 <div className={cn("max-w-[80%] rounded-2xl px-4 py-2", m.role === "user" ? "bg-blue-600 text-white" : "bg-muted")}>
+                  <span className={`flex gap-2 mb-1 ${m.role === "user" ? "justify-end items-end" : "justify-start items-start"}`}>
+                    {m.role === "user" ? <PersonIcon className="h-5 w-5" /> : <RobotIcon className="h-5 w-5" />}
+                    <span>{m.role === "user" ? "Anda" : "Jackie AI"}</span>
+                  </span>
                   <div dangerouslySetInnerHTML={{ __html: md.render(m.content) }} className="prose prose-sm dark:prose-invert max-w-none" />
                   {m?.experimental_attachments
                     ?.filter((attachment) => attachment?.contentType?.startsWith("image/") || attachment?.contentType?.startsWith("application/pdf"))
@@ -116,10 +121,22 @@ export default function Chat() {
         <div className="p-4 border-t bg-background">
           {files && (
             <div className="flex items-center mb-2 p-2 bg-muted rounded-lg">
-              <div className="flex-1 truncate text-sm">
-                {Array.from(files)
-                  .map((file) => file.name)
-                  .join(", ")}
+              <div className="flex-1 truncate">
+                {Array.from(files).map((file, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    {file.type.startsWith("image/") ? (
+                      <>
+                        <Image src={URL.createObjectURL(file)} alt={file.name} width={40} height={40} className="rounded object-cover" />
+                        <span className="text-sm">{file.name}</span>
+                      </>
+                    ) : (
+                      <>
+                        <DocsIcon className="h-4 w-4" />
+                        <span className="text-sm">{file.name}</span>
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
               <Button variant="ghost" size="icon" onClick={removeFile} className="h-8 w-8">
                 <X className="h-4 w-4" />
