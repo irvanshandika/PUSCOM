@@ -58,94 +58,89 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  // const handleLogout = async () => {
-  //   try {
-  //     await signOut(auth); // Tunggu sampai signOut selesai
-  //     router.push("/"); // Setelah berhasil logout, arahkan ke halaman utama
-  //   } catch (error: any) {
-  //     console.log("Error signing out: ", error.message);
-  //   }
-  // };
-
   return (
-    <div className={cn("rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 flex-1 mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden", "h-screen")}>
-      <Sidebar open={open} setOpen={setOpen} animate={false}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {open ? <Logo /> : <LogoIcon />}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
+    <div className="flex h-screen w-full overflow-hidden">
+      <div className={cn("flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 flex-1 border border-neutral-200 dark:border-neutral-700")}>
+        <Sidebar open={open} setOpen={setOpen} animate={false}>
+          <SidebarBody className="justify-between gap-10">
+            <div className="flex flex-col flex-1">
+              {open ? <Logo /> : <LogoIcon />}
+              <div className="mt-8 flex flex-col gap-2">
+                {links.map((link, idx) => (
+                  <SidebarLink key={idx} link={link} />
+                ))}
+              </div>
             </div>
+            <div>
+              {user && user.photoURL ? (
+                <>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-full flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Image src={user.photoURL} alt={user.displayName} className="h-7 w-7 flex-shrink-0 rounded-full" width={0} height={0} />
+                        <DropdownTitle
+                          title={{
+                            label: `${user.displayName}`,
+                          }}
+                        />
+                      </div>
+                      <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56">
+                      <DropdownMenuLabel className="flex items-center gap-2">
+                        <Settings className="h-4 w-4 text-muted-foreground" />
+                        <span>General</span>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <User className="mr-2 h-4 w-4" />
+                          <span>Account</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <Globe className="mr-2 h-4 w-4" />
+                          <span>Domains</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <Link2 className="mr-2 h-4 w-4" />
+                          <span>Integrations</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>Team</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          <span>Payouts</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
+                          <FileText className="mr-2 h-4 w-4" />
+                          <span>Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <>
+                  <SidebarLink
+                    link={{
+                      label: `${user && user.displayName}`,
+                      href: "#",
+                      icon: <Users className="h-7 w-7 flex-shrink-0 rounded-full" />,
+                    }}
+                  />
+                </>
+              )}
+            </div>
+          </SidebarBody>
+        </Sidebar>
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-2 md:p-10 rounded-tl-2xl flex flex-col gap-2 w-full min-h-full dark:bg-neutral-950">
+            {children}
           </div>
-          <div>
-            {user && user.photoURL ? (
-              <>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="w-full flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Image src={user.photoURL} alt={user.displayName} className="h-7 w-7 flex-shrink-0 rounded-full" width={0} height={0} />
-                      <DropdownTitle
-                        title={{
-                          label: `${user.displayName}`,
-                        }}
-                      />
-                    </div>
-                    <ChevronDown className="h-4 w-4 flex-shrink-0" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                    <DropdownMenuLabel className="flex items-center gap-2">
-                      <Settings className="h-4 w-4 text-muted-foreground" />
-                      <span>General</span>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <Globe className="mr-2 h-4 w-4" />
-                        <span>Domains</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <Link2 className="mr-2 h-4 w-4" />
-                        <span>Integrations</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <Users className="mr-2 h-4 w-4" />
-                        <span>Team</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        <span>Payouts</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => router.push("#")} className="cursor-pointer">
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>Logout</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <SidebarLink
-                  link={{
-                    label: `${user && user.displayName}`,
-                    href: "#",
-                    icon: <Users className="h-7 w-7 flex-shrink-0 rounded-full" />,
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </SidebarBody>
-        <div className="flex flex-1">
-          <div className="p-2 md:p-10 rounded-tl-2xl flex flex-col gap-2 flex-1 w-full h-full overflow-y-auto dark:bg-neutral-950">{children}</div>
-        </div>
-      </Sidebar>
+        </main>
+      </div>
     </div>
   );
 }
