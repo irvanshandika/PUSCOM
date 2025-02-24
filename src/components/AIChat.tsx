@@ -45,7 +45,7 @@ export default function Chat() {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-  }, [scrollAreaRef]); //Corrected dependency
+  }, [scrollAreaRef]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
