@@ -230,26 +230,26 @@ export default function RaniAIServiceAssistant() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="container mx-auto px-2 sm:px-4 py-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left column: Analytics */}
         <div className="lg:col-span-2">
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <RobotIcon className="h-6 w-6" />
+          <Card className="mb-4 md:mb-6">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+                <RobotIcon className="h-5 w-5 md:h-6 md:w-6" />
                 Dashboard Analitik Rani AI
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 md:p-6">
               <Tabs defaultValue="summary" className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <TabsList>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+                  <TabsList className="mb-2 sm:mb-0">
                     <TabsTrigger value="summary">Ringkasan</TabsTrigger>
                     <TabsTrigger value="charts">Grafik</TabsTrigger>
                   </TabsList>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button 
                       variant={activePeriod === "week" ? "default" : "outline"} 
                       size="sm"
@@ -278,37 +278,37 @@ export default function RaniAIServiceAssistant() {
                   {isLoading ? (
                     <p>Memuat data...</p>
                   ) : (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-4 md:space-y-6">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
                         {/* Summary cards */}
                         <Card>
-                          <CardContent className="pt-6">
+                          <CardContent className="pt-4 md:pt-6 px-2 sm:px-4">
                             <div className="text-center">
-                              <div className="text-2xl font-bold">{services.length}</div>
+                              <div className="text-xl md:text-2xl font-bold">{services.length}</div>
                               <p className="text-xs text-muted-foreground">Total Servis</p>
                             </div>
                           </CardContent>
                         </Card>
                         <Card>
-                          <CardContent className="pt-6">
+                          <CardContent className="pt-4 md:pt-6 px-2 sm:px-4">
                             <div className="text-center">
-                              <div className="text-2xl font-bold">{services.filter(s => s.status === "pending").length}</div>
+                              <div className="text-xl md:text-2xl font-bold">{services.filter(s => s.status === "pending").length}</div>
                               <p className="text-xs text-muted-foreground">Pending</p>
                             </div>
                           </CardContent>
                         </Card>
                         <Card>
-                          <CardContent className="pt-6">
+                          <CardContent className="pt-4 md:pt-6 px-2 sm:px-4">
                             <div className="text-center">
-                              <div className="text-2xl font-bold">{services.filter(s => s.status === "in_progress").length}</div>
+                              <div className="text-xl md:text-2xl font-bold">{services.filter(s => s.status === "in_progress").length}</div>
                               <p className="text-xs text-muted-foreground">Sedang Dikerjakan</p>
                             </div>
                           </CardContent>
                         </Card>
                         <Card>
-                          <CardContent className="pt-6">
+                          <CardContent className="pt-4 md:pt-6 px-2 sm:px-4">
                             <div className="text-center">
-                              <div className="text-2xl font-bold">{services.filter(s => s.status === "completed").length}</div>
+                              <div className="text-xl md:text-2xl font-bold">{services.filter(s => s.status === "completed").length}</div>
                               <p className="text-xs text-muted-foreground">Selesai</p>
                             </div>
                           </CardContent>
@@ -317,14 +317,14 @@ export default function RaniAIServiceAssistant() {
 
                       {/* Common issues */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Masalah Umum</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-2">
+                        <h3 className="text-base md:text-lg font-medium mb-2">Masalah Umum</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                           {getServiceAnalysisSummary().topIssues.map(([issue, count], index) => (
                             <Card key={index}>
-                              <CardContent className="p-4">
+                              <CardContent className="p-2 sm:p-4">
                                 <div className="text-center">
-                                  <div className="font-bold">{count}</div>
-                                  <p className="text-xs text-muted-foreground capitalize">{issue}</p>
+                                  <div className="font-bold text-sm md:text-base">{count}</div>
+                                  <p className="text-xs text-muted-foreground capitalize truncate">{issue}</p>
                                 </div>
                               </CardContent>
                             </Card>
@@ -334,18 +334,18 @@ export default function RaniAIServiceAssistant() {
 
                       {/* Recent services */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Service Terbaru</h3>
+                        <h3 className="text-base md:text-lg font-medium mb-2">Service Terbaru</h3>
                         <div className="space-y-2">
                           {services.slice(0, 5).map((service, index) => (
                             <Card key={index}>
-                              <CardContent className="p-4">
-                                <div className="flex justify-between items-start">
+                              <CardContent className="p-3 sm:p-4">
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-2 sm:gap-0">
                                   <div>
-                                    <p className="font-medium">{service.name}</p>
-                                    <p className="text-sm text-muted-foreground">{service.deviceType} - {service.brand || service.customBrand || service.computerTypes}</p>
+                                    <p className="font-medium text-sm md:text-base">{service.name}</p>
+                                    <p className="text-xs md:text-sm text-muted-foreground truncate">{service.deviceType} - {service.brand || service.customBrand || service.computerTypes}</p>
                                     <p className="text-xs text-muted-foreground">{format(new Date(service.date), "dd MMMM yyyy", { locale: id })}</p>
                                   </div>
-                                  <div className={`px-2 py-1 rounded-full text-xs ${
+                                  <div className={`self-start sm:self-auto px-2 py-1 rounded-full text-xs ${
                                     service.status === "pending" ? "bg-yellow-100 text-yellow-800" :
                                     service.status === "in_progress" ? "bg-blue-100 text-blue-800" :
                                     service.status === "completed" ? "bg-green-100 text-green-800" :
@@ -370,11 +370,11 @@ export default function RaniAIServiceAssistant() {
                   {isLoading ? (
                     <p>Memuat data...</p>
                   ) : (
-                    <div className="space-y-6">
+                    <div className="space-y-4 md:space-y-6">
                       {/* Device Type Distribution */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Distribusi Tipe Perangkat</h3>
-                        <div className="h-[250px]">
+                        <h3 className="text-base md:text-lg font-medium mb-2">Distribusi Tipe Perangkat</h3>
+                        <div className="h-[200px] md:h-[250px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -399,8 +399,8 @@ export default function RaniAIServiceAssistant() {
 
                       {/* Status Distribution */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Distribusi Status</h3>
-                        <div className="h-[250px]">
+                        <h3 className="text-base md:text-lg font-medium mb-2">Distribusi Status</h3>
+                        <div className="h-[200px] md:h-[250px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
@@ -425,21 +425,21 @@ export default function RaniAIServiceAssistant() {
 
                       {/* Top Brands */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Top 5 Brand</h3>
-                        <div className="h-[250px]">
+                        <h3 className="text-base md:text-lg font-medium mb-2">Top 5 Brand</h3>
+                        <div className="h-[200px] md:h-[250px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                               data={brandData}
                               margin={{
                                 top: 5,
-                                right: 30,
-                                left: 20,
+                                right: 20,
+                                left: 10,
                                 bottom: 5,
                               }}
                             >
                               <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="name" />
-                              <YAxis />
+                              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
                               <Tooltip />
                               <Bar dataKey="value" fill="#8884d8" name="Jumlah" />
                             </BarChart>
@@ -449,21 +449,21 @@ export default function RaniAIServiceAssistant() {
 
                       {/* Daily Service Trend */}
                       <div>
-                        <h3 className="text-lg font-medium mb-2">Tren Service Harian (30 Hari Terakhir)</h3>
-                        <div className="h-[250px]">
+                        <h3 className="text-base md:text-lg font-medium mb-2">Tren Service Harian (30 Hari Terakhir)</h3>
+                        <div className="h-[200px] md:h-[250px]">
                           <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                               data={dailyServiceData}
                               margin={{
                                 top: 5,
-                                right: 30,
-                                left: 20,
+                                right: 20,
+                                left: 10,
                                 bottom: 5,
                               }}
                             >
                               <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="date" />
-                              <YAxis />
+                              <XAxis dataKey="date" tick={{ fontSize: 9 }} interval={window.innerWidth < 768 ? 3 : 1} />
+                              <YAxis tick={{ fontSize: 10 }} />
                               <Tooltip />
                               <Bar dataKey="count" fill="#0088FE" name="Service Masuk" />
                             </BarChart>
@@ -480,48 +480,48 @@ export default function RaniAIServiceAssistant() {
 
         {/* Right column: Chatbot */}
         <div>
-          <Card className="h-full flex flex-col">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+          <Card className="h-[550px] lg:h-full flex flex-col">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white lg:py-3 lg:px-4 md:p-6">
               <CardTitle className="flex items-center gap-2">
-                <RobotIcon className="h-6 w-6" />
+                <RobotIcon className="h-5 w-5 md:h-6 md:w-6" />
                 <div>
-                  <h1 className="text-lg font-bold">Rani AI</h1>
+                  <h1 className="text-base md:text-lg font-bold">Rani AI</h1>
                   <p className="text-xs text-blue-100">Asisten Teknisi & Admin PUSCOM</p>
                 </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col p-0">
-              <ScrollArea className="flex-1 h-[600px] p-4" ref={scrollAreaRef}>
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 h-[400px] sm:h-[450px] lg:h-[600px] p-3 md:p-4" ref={scrollAreaRef}>
+                <div className="space-y-3 md:space-y-4">
                   {messages.map((m) => (
                     <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                      <div className={cn("max-w-[90%] rounded-2xl px-4 py-2", m.role === "user" ? "bg-blue-600 text-white" : "bg-muted")}>
-                        <span className={`flex gap-2 mb-1 ${m.role === "user" ? "justify-end items-end" : "justify-start items-start"}`}>
-                          {m.role === "user" ? <PersonIcon className="h-5 w-5" /> : <RobotIcon className="h-5 w-5" />}
+                      <div className={cn("max-w-[85%] sm:max-w-[90%] rounded-2xl px-3 py-2 md:px-4 md:py-3", m.role === "user" ? "bg-blue-600 text-white" : "bg-muted")}>
+                        <span className={`flex gap-1 md:gap-2 mb-1 text-xs md:text-sm ${m.role === "user" ? "justify-end items-end" : "justify-start items-start"}`}>
+                          {m.role === "user" ? <PersonIcon className="h-4 w-4 md:h-5 md:w-5" /> : <RobotIcon className="h-4 w-4 md:h-5 md:w-5" />}
                           <span>{m.role === "user" ? "Anda" : "Rani AI"}</span>
                         </span>
                         <div 
                           dangerouslySetInnerHTML={{ __html: md.render(m.content) }} 
-                          className="prose prose-sm dark:prose-invert max-w-none" 
+                          className="prose prose-xs sm:prose-sm dark:prose-invert max-w-none"
                         />
                       </div>
                     </div>
                   ))}
                 </div>
               </ScrollArea>
-              <div className="p-4 border-t">
+              <div className="p-3 md:p-4 border-t">
                 <form ref={formRef} className="flex items-end gap-2" onSubmit={handleSubmit}>
                   <div className="relative flex-grow">
                     <Textarea 
                       value={input} 
                       onChange={handleInputChange} 
                       onKeyDown={handleKeyDown}
-                      placeholder="Tanyakan tentang analisis kerusakan, rekapitulasi data, atau bantuan lainnya..." 
-                      className="pr-10 resize-none" 
+                      placeholder="Tanyakan tentang analisis kerusakan..." 
+                      className="pr-10 resize-none text-sm" 
                       rows={2} 
                     />
-                    <Button type="submit" size="icon" className="absolute right-2 bottom-2 h-8 w-8">
-                      <Send className="h-4 w-4" />
+                    <Button type="submit" size="icon" className="absolute right-2 bottom-2 h-7 w-7 md:h-8 md:w-8">
+                      <Send className="h-3 w-3 md:h-4 md:w-4" />
                     </Button>
                   </div>
                 </form>

@@ -1,9 +1,9 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore";
-import { db, storage } from "@/src/config/FirebaseConfig";
+import { collection, addDoc, doc, getDoc } from "firebase/firestore";
+import { db, storage, auth } from "@/src/config/FirebaseConfig";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
@@ -21,7 +21,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useRouter } from "next/navigation";
 
+// Schema yang sama seperti sebelumnya...
 const serviceRequestSchema = z.object({
+  // tambahkan uid ke schema
+  uid: z.string(),
   name: z.string().min(1, "Nama harus diisi"),
   phoneNumber: z
     .string()
@@ -54,6 +57,7 @@ export default function ServiceRequest() {
   const form = useForm<ServiceRequestSchema>({
     resolver: zodResolver(serviceRequestSchema),
     defaultValues: {
+      uid: "",
       name: "",
       phoneNumber: "",
       email: "",
@@ -65,6 +69,37 @@ export default function ServiceRequest() {
       images: [],
     },
   });
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          toast.error("Silakan login terlebih dahulu");
+          route.push("/auth/signin");
+          return;
+        }
+
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          form.reset({
+            ...form.getValues(),
+            uid: currentUser.uid,
+            name: userData.displayName,
+            email: userData.email,
+            phoneNumber: userData.phoneNumber || "", // Jika ada
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Gagal memuat data pengguna");
+      }
+    };
+
+    fetchUserData();
+  }, [form, route]);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -106,6 +141,7 @@ export default function ServiceRequest() {
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Modifikasi onSubmit untuk menyertakan uid
   const onSubmit = async (data: ServiceRequestSchema) => {
     if (!executeRecaptcha) {
       toast.error("reCAPTCHA belum siap");
@@ -137,7 +173,7 @@ export default function ServiceRequest() {
         imageUrls.push(url);
       }
 
-      // Save to Firestore
+      // Save to Firestore with uid
       const serviceRef = collection(db, "service_requests");
       const docRef = await addDoc(serviceRef, {
         ...data,

@@ -4,7 +4,7 @@ import Layout from "@/src/components/user/layout"
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ri",
+  title: "Histori",
 };
 
 function Riwayat() {
