@@ -64,6 +64,7 @@ export default function ServiceDashboardPage() {
         await addDoc(recentActivityRef, {
           activity,
           serviceId,
+          name,
           technicianName: user.displayName,
           timestamp: new Date(),
         });
@@ -73,25 +74,25 @@ export default function ServiceDashboardPage() {
     }
   };
 
-  const handleStatusChange = async (serviceId: string, newStatus: string) => {
+  const handleStatusChange = async (name: string, newStatus: string) => {
     if (newStatus === "rejected") {
-      setSelectedService(services.find((s) => s.id === serviceId) || null);
+      setSelectedService(services.find((s) => s.id === name) || null);
       setShowRejectDialog(true);
       return;
     }
 
     try {
       setIsUpdating(true);
-      const serviceRef = doc(db, "service_requests", serviceId);
+      const serviceRef = doc(db, "service_requests", name);
       await updateDoc(serviceRef, {
         status: newStatus,
       });
 
       // Menyimpan aktivitas terkini untuk status baru
       if (newStatus === "in_progress") {
-        saveRecentActivity(`${user?.displayName} mengambil alih perbaikan ${serviceId}`, serviceId);
+        saveRecentActivity(`${user?.displayName} mengambil alih perbaikan ${name}`, name);
       } else if (newStatus === "completed") {
-        saveRecentActivity(`${user?.displayName} telah menyelesaikan perbaikan ${serviceId}`, serviceId);
+        saveRecentActivity(`${user?.displayName} telah menyelesaikan perbaikan ${name}`, name);
       }
 
       toast.success("Status berhasil diperbarui");
@@ -131,7 +132,7 @@ export default function ServiceDashboardPage() {
   };
 
   const ServiceTable = ({ status }: { status?: string }) => {
-    const filteredServices = status ? services.filter((service) => service.status === status) : services.filter((service) => !["completed", "rejected"].includes(service.status));
+    const filteredServices = status ? services.filter((service) => service.status === status) : services.filter((service) => !["in_progress", "completed", "rejected"].includes(service.status));
 
     return (
       <Table>
@@ -155,10 +156,12 @@ export default function ServiceDashboardPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pending" disabled className="disabled:cursor-not-allowed">
+                      Pending
+                    </SelectItem>
+                    <SelectItem value="in_progress" disabled className="disabled:cursor-not-allowed">Terima</SelectItem>
+                    <SelectItem value="completed">Selesai</SelectItem>
+                    <SelectItem value="rejected">Tolak</SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>
@@ -190,13 +193,18 @@ export default function ServiceDashboardPage() {
         <CardContent>
           <Tabs defaultValue="active" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+              <TabsTrigger value="active">Daftar Servis</TabsTrigger>
+              <TabsTrigger value="in_progress">Sedang Dikerjakan</TabsTrigger>
+              <TabsTrigger value="completed">Selesai</TabsTrigger>
+              <TabsTrigger value="rejected">Tolak</TabsTrigger>
             </TabsList>
 
             <TabsContent value="active">
-              <ServiceTable />
+              <ServiceTable status="active" />
+            </TabsContent>
+
+            <TabsContent value="in_progress">
+              <ServiceTable status="in_progress" />
             </TabsContent>
 
             <TabsContent value="completed">
