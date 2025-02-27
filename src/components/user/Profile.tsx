@@ -1,4 +1,4 @@
-import { LogOut, MoveUpRight, Settings, CreditCard, FileText } from "lucide-react";
+import { LogOut, MoveUpRight, Settings, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -15,7 +15,6 @@ interface MenuItem {
   icon?: React.ReactNode;
   external?: boolean;
 }
-
 
 interface UserData {
   displayName: string;
@@ -52,7 +51,9 @@ export default function Profile01() {
     try {
       await signOut(auth);
       toast.success("Logged out successfully");
-      router.push("/auth/signin");
+      setTimeout(() => {
+        router.replace("/");
+      }, 100);
     } catch (error) {
       toast.error("Error logging out");
       console.error("Error logging out:", error);
@@ -61,15 +62,8 @@ export default function Profile01() {
 
   const menuItems: MenuItem[] = [
     {
-      label: "Subscription",
-      value: "Free Trial",
-      href: "#",
-      icon: <CreditCard className="w-4 h-4" />,
-      external: false,
-    },
-    {
-      label: "Settings",
-      href: "#",
+      label: "Pengaturan",
+      href: "/settings",
       icon: <Settings className="w-4 h-4" />,
     },
     {
@@ -81,7 +75,42 @@ export default function Profile01() {
   ];
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <>
+        <div className="w-full max-w-sm mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-zinc-200 dark:border-zinc-800">
+            <div className="relative px-6 pt-12 pb-6">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="relative shrink-0">
+                  <div className="w-[72px] h-[72px] rounded-full bg-zinc-200 dark:bg-zinc-800 animate-pulse" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-zinc-300 dark:bg-zinc-700 animate-pulse ring-2 ring-white dark:ring-zinc-900" />
+                </div>
+
+                {/* Profile Info Skeleton */}
+                <div className="flex-1">
+                  <div className="h-6 w-32 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse mb-2"></div>
+                  <div className="h-4 w-20 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              <div className="h-px bg-zinc-200 dark:bg-zinc-800 my-6" />
+
+              {/* Menu Items Skeleton */}
+              <div className="space-y-2">
+                {[1, 2, 3].map((item) => (
+                  <div key={item} className="flex items-center justify-between p-2 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
+                      <div className="h-4 w-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (

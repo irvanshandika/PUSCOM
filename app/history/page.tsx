@@ -1,6 +1,6 @@
 import React from "react";
 import RiwayatPage from "./main";
-import Layout from "@/src/components/user/layout"
+import Layout from "@/src/layout/layout";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

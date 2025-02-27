@@ -1,6 +1,6 @@
 import ProfileForm from "./main";
 import type { Metadata } from "next";
-import Layout from "@/src/components/user/layout";
+import Layout from "@/src/layout/layout";
 
 export const metadata: Metadata = {
   title: "Profile | PUSCOM",

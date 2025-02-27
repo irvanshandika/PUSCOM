@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import Sidebar from "./Sidebar";
-import Navbar from "./Navbar";
+import Sidebar from "@/src/components/user/Sidebar";
+import Navbar from "@/src/components/user/Navbar";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
