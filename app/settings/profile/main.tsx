@@ -178,7 +178,6 @@ function ProfilePage() {
           file = fileInput.files[0];
         } else if (photoPreview.startsWith("data:")) {
           // Handle dropped file that was previewed but not in the file input
-          // Convert base64 to file
           const response = await fetch(photoPreview);
           const blob = await response.blob();
           file = new File([blob], "profile.jpg", { type: "image/jpeg" });
@@ -188,24 +187,19 @@ function ProfilePage() {
           const storageRef = ref(storage, `profileImages/${user.uid}`);
           await uploadBytes(storageRef, file);
           newPhotoURL = await getDownloadURL(storageRef);
+          // Update Firebase Auth user profile with new photoURL
+          await updateProfile(user, { photoURL: newPhotoURL });
         }
       }
 
-      // Update Auth profile first
-      await updateProfile(user, {
-        displayName: data.displayName,
-        photoURL: newPhotoURL,
-      });
-
-      // Then update Firestore
-      const updateData = {
+      // Update user data in Firestore
+      const updateData: any = {
         displayName: data.displayName,
         email: data.email,
         phoneNumber: data.phoneNumber,
         photoURL: newPhotoURL,
       };
 
-      // Update user document in Firestore
       await updateDoc(doc(db, "users", user.uid), updateData);
 
       toast.success("Profile updated successfully!", {
@@ -301,7 +295,9 @@ function ProfilePage() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-24 w-24">
                       <AvatarImage src={photoPreview || ""} alt="Avatar" />
-                      <AvatarFallback>{form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}</AvatarFallback>
+                      <AvatarFallback>
+                        {form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -313,13 +309,18 @@ function ProfilePage() {
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Change Avatar</DialogTitle>
-                            <DialogDescription>Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.</DialogDescription>
+                            <DialogDescription>
+                              Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.
+                            </DialogDescription>
                           </DialogHeader>
                           <div
-                            className={`border-2 border-dashed rounded-lg p-6 text-center ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300"}`}
+                            className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                              isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
+                            }`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}>
+                            onDrop={handleDrop}
+                          >
                             {photoPreview && (
                               <div className="mb-4 flex justify-center">
                                 <Image src={photoPreview} alt="Preview" width={150} height={150} className="rounded-lg max-h-40 object-cover" />
@@ -371,9 +372,18 @@ function ProfilePage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="example@example.com" {...field} disabled={signType === "google"} className={signType === "google" ? "cursor-not-allowed" : ""} />
+                          <Input
+                            placeholder="example@example.com"
+                            {...field}
+                            disabled={signType === "google"}
+                            className={signType === "google" ? "cursor-not-allowed" : ""}
+                          />
                         </FormControl>
-                        <FormDescription>{signType === "google" ? "Email cannot be changed for Google accounts" : "You can manage verified email addresses in your email settings."}</FormDescription>
+                        <FormDescription>
+                          {signType === "google"
+                            ? "Email cannot be changed for Google accounts"
+                            : "You can manage verified email addresses in your email settings."}
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -418,7 +428,11 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showCurrentPassword ? "text" : "password"} {...field} />
-                            <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button
+                              type="button"
+                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            >
                               {showCurrentPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
@@ -436,12 +450,18 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showNewPassword ? "text" : "password"} {...field} />
-                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPassword(!showNewPassword)}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            >
                               {showNewPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
                         </FormControl>
-                        <FormDescription>Password must contain at least one uppercase letter, one lowercase letter, and one number</FormDescription>
+                        <FormDescription>
+                          Password must contain at least one uppercase letter, one lowercase letter, and one number
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -455,7 +475,11 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showConfirmPassword ? "text" : "password"} {...field} />
-                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                            <button
+                              type="button"
+                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            >
                               {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
