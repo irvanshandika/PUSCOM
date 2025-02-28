@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import Layout from "@/src/layout/layout";
 
 export const metadata: Metadata = {
-  title: "Profile | PUSCOM",
-  description: "Manage your PUSCOM profile",
+  title: "Profile",
 };
 
 export default function ProfilePage() {
