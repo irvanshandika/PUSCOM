@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { auth, db, storage } from "@/src/config/FirebaseConfig";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { updatePassword } from "firebase/auth";
+import { updatePassword, updateProfile } from "firebase/auth";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Switch } from "@/src/components/ui/switch";
@@ -35,19 +35,21 @@ const profileSchema = z.object({
 });
 
 // Password schema definition
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, { message: "Current password is required" }),
-  newPassword: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" })
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/, {
-      message: "Password must contain at least one uppercase letter, one lowercase letter, and one number",
-    }),
-  confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, { message: "Current password is required" }),
+    newPassword: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters" })
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/, {
+        message: "Password must contain at least one uppercase letter, one lowercase letter, and one number",
+      }),
+    confirmPassword: z.string().min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 type PasswordFormValues = z.infer<typeof passwordSchema>;
@@ -120,7 +122,7 @@ function ProfilePage() {
 
   const validateAndPreviewFile = (file: File) => {
     // Check file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/svg+xml"];
     if (!validTypes.includes(file.type)) {
       toast.error("Please upload an image file (JPG, PNG, GIF, WEBP, SVG)");
       return;
@@ -153,7 +155,7 @@ function ProfilePage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       validateAndPreviewFile(e.dataTransfer.files[0]);
     }
@@ -171,15 +173,15 @@ function ProfilePage() {
       if (photoPreview && photoPreview !== photoURL) {
         const fileInput = document.getElementById("profile-photo") as HTMLInputElement;
         let file: File | undefined;
-        
+
         if (fileInput && fileInput.files && fileInput.files.length > 0) {
           file = fileInput.files[0];
-        } else if (photoPreview.startsWith('data:')) {
+        } else if (photoPreview.startsWith("data:")) {
           // Handle dropped file that was previewed but not in the file input
           // Convert base64 to file
           const response = await fetch(photoPreview);
           const blob = await response.blob();
-          file = new File([blob], "profile.jpg", { type: 'image/jpeg' });
+          file = new File([blob], "profile.jpg", { type: "image/jpeg" });
         }
 
         if (file) {
@@ -189,15 +191,21 @@ function ProfilePage() {
         }
       }
 
-      // Update user data in Firestore
-      const updateData: any = {
+      // Update Auth profile first
+      await updateProfile(user, {
+        displayName: data.displayName,
+        photoURL: newPhotoURL,
+      });
+
+      // Then update Firestore
+      const updateData = {
         displayName: data.displayName,
         email: data.email,
         phoneNumber: data.phoneNumber,
         photoURL: newPhotoURL,
       };
 
-      // Update user document
+      // Update user document in Firestore
       await updateDoc(doc(db, "users", user.uid), updateData);
 
       toast.success("Profile updated successfully!", {
@@ -226,22 +234,22 @@ function ProfilePage() {
 
       // Update Firebase Auth password
       await updatePassword(user, data.newPassword);
-      
+
       // Update the hashed password in Firestore
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(data.newPassword, salt);
-      
+
       await updateDoc(doc(db, "users", user.uid), {
-        hashedPassword: hashedPassword
+        hashedPassword: hashedPassword,
       });
 
       toast.success("Password updated successfully! You will be logged out.", {
         duration: 3000,
       });
-      
+
       // Clear form
       passwordForm.reset();
-      
+
       // Log out after password change
       setTimeout(() => {
         auth.signOut();
@@ -276,7 +284,9 @@ function ProfilePage() {
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="password" disabled={signType === "google"}>Password</TabsTrigger>
+          <TabsTrigger value="password" disabled={signType === "google"}>
+            Password
+          </TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-4">
@@ -287,82 +297,59 @@ function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Form {...form}>
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={photoPreview || "/placeholder-avatar.jpg"} alt="Avatar" />
-                    <AvatarFallback>{form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="mb-2">
-                          Change Avatar
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Change Avatar</DialogTitle>
-                          <DialogDescription>
-                            Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div 
-                          className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                            isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
-                          }`}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                        >
-                          {photoPreview && (
-                            <div className="mb-4 flex justify-center">
-                              <Image 
-                                src={photoPreview} 
-                                alt="Preview" 
-                                width={150} 
-                                height={150} 
-                                className="rounded-lg max-h-40 object-cover" 
-                              />
-                            </div>
-                          )}
-                          <div className="space-y-2">
-                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                            <div className="flex text-sm text-gray-600 flex-col items-center">
-                              <label
-                                htmlFor="profile-photo"
-                                className="relative cursor-pointer rounded-md bg-white font-medium text-primary hover:text-primary/80 focus-within:outline-none"
-                              >
-                                <span>Upload a file</span>
-                                <input
-                                  id="profile-photo"
-                                  name="profile-photo"
-                                  type="file"
-                                  className="sr-only"
-                                  accept="image/*"
-                                  onChange={handleFileChange}
-                                />
-                              </label>
-                              <p className="pl-1">or drag and drop</p>
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              JPG, PNG, GIF, WEBP or SVG up to 15MB
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button type="button" onClick={() => setIsDialogOpen(false)}>
-                            Done
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                    <p className="text-sm text-muted-foreground">JPG, PNG, GIF, WEBP or SVG. Max size of 15MB</p>
-                  </div>
-                </div>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={photoPreview || ""} alt="Avatar" />
+                      <AvatarFallback>{form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" size="sm" className="mb-2">
+                            Change Avatar
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Change Avatar</DialogTitle>
+                            <DialogDescription>Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.</DialogDescription>
+                          </DialogHeader>
+                          <div
+                            className={`border-2 border-dashed rounded-lg p-6 text-center ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300"}`}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}>
+                            {photoPreview && (
+                              <div className="mb-4 flex justify-center">
+                                <Image src={photoPreview} alt="Preview" width={150} height={150} className="rounded-lg max-h-40 object-cover" />
+                              </div>
+                            )}
+                            <div className="space-y-2">
+                              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                              <div className="flex text-sm text-gray-600 flex-col items-center">
+                                <label htmlFor="profile-photo" className="relative cursor-pointer rounded-md bg-white font-medium text-primary hover:text-primary/80 focus-within:outline-none">
+                                  <span>Upload a file</span>
+                                  <input id="profile-photo" name="profile-photo" type="file" className="sr-only" accept="image/*" onChange={handleFileChange} />
+                                </label>
+                                <p className="pl-1">or drag and drop</p>
+                              </div>
+                              <p className="text-xs text-gray-500">JPG, PNG, GIF, WEBP or SVG up to 15MB</p>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                              Cancel
+                            </Button>
+                            <Button type="button" onClick={() => setIsDialogOpen(false)}>
+                              Done
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                      <p className="text-sm text-muted-foreground">JPG, PNG, GIF, WEBP or SVG. Max size of 15MB</p>
+                    </div>
+                  </div>
                   <FormField
                     control={form.control}
                     name="displayName"
@@ -384,18 +371,9 @@ function ProfilePage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="example@example.com" 
-                            {...field} 
-                            disabled={signType === "google"}
-                            className={signType === "google" ? "cursor-not-allowed" : ""}
-                          />
+                          <Input placeholder="example@example.com" {...field} disabled={signType === "google"} className={signType === "google" ? "cursor-not-allowed" : ""} />
                         </FormControl>
-                        <FormDescription>
-                          {signType === "google" 
-                            ? "Email cannot be changed for Google accounts" 
-                            : "You can manage verified email addresses in your email settings."}
-                        </FormDescription>
+                        <FormDescription>{signType === "google" ? "Email cannot be changed for Google accounts" : "You can manage verified email addresses in your email settings."}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -439,19 +417,9 @@ function ProfilePage() {
                         <FormLabel>Current password</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Input 
-                              type={showCurrentPassword ? "text" : "password"}
-                              {...field} 
-                            />
-                            <button 
-                              type="button" 
-                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                              {showCurrentPassword ? 
-                                <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                                <Eye className="h-5 w-5 text-gray-400" />
-                              }
+                            <Input type={showCurrentPassword ? "text" : "password"} {...field} />
+                            <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                              {showCurrentPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
                         </FormControl>
@@ -467,25 +435,13 @@ function ProfilePage() {
                         <FormLabel>New password</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Input 
-                              type={showNewPassword ? "text" : "password"}
-                              {...field} 
-                            />
-                            <button 
-                              type="button" 
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                              {showNewPassword ? 
-                                <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                                <Eye className="h-5 w-5 text-gray-400" />
-                              }
+                            <Input type={showNewPassword ? "text" : "password"} {...field} />
+                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                              {showNewPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
                         </FormControl>
-                        <FormDescription>
-                          Password must contain at least one uppercase letter, one lowercase letter, and one number
-                        </FormDescription>
+                        <FormDescription>Password must contain at least one uppercase letter, one lowercase letter, and one number</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -498,19 +454,9 @@ function ProfilePage() {
                         <FormLabel>Confirm password</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Input 
-                              type={showConfirmPassword ? "text" : "password"}
-                              {...field} 
-                            />
-                            <button 
-                              type="button" 
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
-                              {showConfirmPassword ? 
-                                <EyeOff className="h-5 w-5 text-gray-400" /> : 
-                                <Eye className="h-5 w-5 text-gray-400" />
-                              }
+                            <Input type={showConfirmPassword ? "text" : "password"} {...field} />
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                              {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
                         </FormControl>
