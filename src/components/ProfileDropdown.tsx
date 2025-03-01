@@ -72,7 +72,7 @@ export default function ProfileDropdown() {
 
         {[
           { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
-          { icon: History, text: "Riwayat", path: "/history" },
+          { icon: History, text: "Riwayat", path: "/settings/history" },
           { icon: Settings, text: "Pengaturan", path: "/settings/profile" },
         ].map((item, index) => (
           <DropdownMenuItem key={index} onClick={() => router.push(item.path)} className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer flex items-center">

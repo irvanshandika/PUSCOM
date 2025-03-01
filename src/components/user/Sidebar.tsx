@@ -54,7 +54,7 @@ export default function Sidebar() {
               <NavItem href="/settings/profile" icon={Settings}>
                 Settings
               </NavItem>
-              <NavItem href="/history" icon={History}>
+              <NavItem href="/settings/history" icon={History}>
                 Histori
               </NavItem>
             </div>
