@@ -50,7 +50,7 @@ export default function Profile01() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success("Logged out successfully");
+      toast.success(`Selamat tinggal, ${userData?.displayName}`);
       setTimeout(() => {
         router.replace("/");
       }, 100);

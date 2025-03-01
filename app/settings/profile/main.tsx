@@ -20,7 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 import { Label } from "@/src/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/src/components/ui/dialog";
-import { Eye, EyeOff, Upload } from "lucide-react";
+import { Eye, EyeOff, Upload, AlertTriangle } from "lucide-react";
 import bcrypt from "bcryptjs";
 import Image from "next/image";
 
@@ -247,7 +247,7 @@ function ProfilePage() {
       // Log out after password change
       setTimeout(() => {
         auth.signOut();
-        router.push("/signin");
+        router.push("/");
       }, 3000);
     } catch (err) {
       toast.error("Error updating password. Please try again.");
@@ -260,11 +260,46 @@ function ProfilePage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-10 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-8 animate-pulse"></div>
-        {/* Loading skeleton for tabs */}
-        <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
-        {/* Loading skeleton for card */}
-        <div className="h-96 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-4"></div>
+        <div>
+          <div className="h-7 w-24 bg-gray-200 dark:bg-gray-700 rounded mb-2 animate-pulse"></div>
+          <div className="h-5 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+        </div>
+        {/* Tabs skeleton */}
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          </div>
+          {/* Card skeleton */}
+          <div className="border rounded-lg p-6 space-y-6">
+            <div className="space-y-2">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              <div className="h-4 w-72 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+            {/* Avatar and form fields skeleton */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="h-24 w-24 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                <div className="space-y-2">
+                  <div className="h-9 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                </div>
+              </div>
+              {/* Form fields skeleton */}
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  </div>
+                ))}
+              </div>
+              <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -281,7 +316,10 @@ function ProfilePage() {
           <TabsTrigger value="password" disabled={signType === "google"}>
             Password
           </TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="danger" className="flex justify-center items-center">
+            Danger Area
+            <AlertTriangle className="h-4 w-4 text-red-500 ml-2" />
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="general" className="space-y-4">
           <Card>
@@ -295,9 +333,7 @@ function ProfilePage() {
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-24 w-24">
                       <AvatarImage src={photoPreview || ""} alt="Avatar" />
-                      <AvatarFallback>
-                        {form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}
-                      </AvatarFallback>
+                      <AvatarFallback>{form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}</AvatarFallback>
                     </Avatar>
                     <div>
                       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -309,18 +345,13 @@ function ProfilePage() {
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>Change Avatar</DialogTitle>
-                            <DialogDescription>
-                              Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.
-                            </DialogDescription>
+                            <DialogDescription>Upload a new profile picture. JPG, PNG, GIF, WEBP or SVG. Max size of 15MB.</DialogDescription>
                           </DialogHeader>
                           <div
-                            className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                              isDragActive ? "border-primary bg-primary/10" : "border-gray-300"
-                            }`}
+                            className={`border-2 border-dashed rounded-lg p-6 text-center ${isDragActive ? "border-primary bg-primary/10" : "border-gray-300"}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
-                            onDrop={handleDrop}
-                          >
+                            onDrop={handleDrop}>
                             {photoPreview && (
                               <div className="mb-4 flex justify-center">
                                 <Image src={photoPreview} alt="Preview" width={150} height={150} className="rounded-lg max-h-40 object-cover" />
@@ -372,18 +403,9 @@ function ProfilePage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="example@example.com"
-                            {...field}
-                            disabled={signType === "google"}
-                            className={signType === "google" ? "cursor-not-allowed" : ""}
-                          />
+                          <Input placeholder="example@example.com" {...field} disabled={signType === "google"} className={signType === "google" ? "cursor-not-allowed" : ""} />
                         </FormControl>
-                        <FormDescription>
-                          {signType === "google"
-                            ? "Email cannot be changed for Google accounts"
-                            : "You can manage verified email addresses in your email settings."}
-                        </FormDescription>
+                        <FormDescription>{signType === "google" ? "Email cannot be changed for Google accounts" : "You can manage verified email addresses in your email settings."}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -428,11 +450,7 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showCurrentPassword ? "text" : "password"} {...field} />
-                            <button
-                              type="button"
-                              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
+                            <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
                               {showCurrentPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
@@ -450,18 +468,12 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showNewPassword ? "text" : "password"} {...field} />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewPassword(!showNewPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
+                            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
                               {showNewPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
                         </FormControl>
-                        <FormDescription>
-                          Password must contain at least one uppercase letter, one lowercase letter, and one number
-                        </FormDescription>
+                        <FormDescription>Password must contain at least one uppercase letter, one lowercase letter, and one number</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -475,11 +487,7 @@ function ProfilePage() {
                         <FormControl>
                           <div className="relative">
                             <Input type={showConfirmPassword ? "text" : "password"} {...field} />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                            >
+                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center">
                               {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
                             </button>
                           </div>
@@ -496,7 +504,7 @@ function ProfilePage() {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="notifications" className="space-y-4">
+        <TabsContent value="danger" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle>Notifications</CardTitle>
