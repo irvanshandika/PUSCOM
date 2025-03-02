@@ -181,7 +181,7 @@ export default function ServiceRequest() {
         createdAt: new Date(),
       });
 
-      toast.success("Permintaan service berhasil dikirim!");
+      toast.success("Permintaan servis berhasil dikirim!");
 
       // Reset form
       route.push(`/receipt/${docRef.id}`);
@@ -196,7 +196,7 @@ export default function ServiceRequest() {
             toast.error("Verifikasi keamanan gagal. Silakan coba lagi.");
             break;
           default:
-            toast.error("Terjadi kesalahan saat mengirim pengajuan service");
+            toast.error("Terjadi kesalahan saat mengirim pengajuan servis");
             break;
         }
       }
@@ -231,7 +231,7 @@ export default function ServiceRequest() {
                       <FormItem>
                         <FormLabel>Nama</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} disabled className="disabled:cursor-not-allowed" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -244,7 +244,7 @@ export default function ServiceRequest() {
                       <FormItem>
                         <FormLabel>Nomor HP</FormLabel>
                         <FormControl>
-                          <Input type="tel" {...field} />
+                          <Input type="tel" {...field} disabled className="disabled:cursor-not-allowed" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -258,7 +258,7 @@ export default function ServiceRequest() {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" {...field} />
+                        <Input type="email" {...field} disabled className="disabled:cursor-not-allowed" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
