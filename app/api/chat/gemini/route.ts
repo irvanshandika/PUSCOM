@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     messages: augmentedMessages,
     temperature: 0.7, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
-    maxTokens: 1000, // Batasi panjang respons
+    maxTokens: 8192, // Batasi panjang respons
   });
 
   return result.toDataStreamResponse();
