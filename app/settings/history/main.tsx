@@ -40,7 +40,7 @@ export default function ServiceHistory() {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (!user) {
-        router.push("/auth/signin");
+        router.push("/forbidden");
       }
     });
 
