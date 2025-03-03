@@ -57,14 +57,13 @@ export default function ServiceDashboardPage() {
   };
 
   // Fungsi untuk menyimpan aktivitas terkini ke koleksi recent_activities
-  const saveRecentActivity = async (activity: string, serviceId: string) => {
+  const saveRecentActivity = async (activity: string, customerName: string) => {
     try {
       if (user) {
         const recentActivityRef = collection(db, "recent_activities");
         await addDoc(recentActivityRef, {
           activity,
-          serviceId,
-          name,
+          customerName, // Menggunakan nama pelanggan sebagai referensi
           technicianName: user.displayName,
           timestamp: new Date(),
         });
@@ -74,25 +73,28 @@ export default function ServiceDashboardPage() {
     }
   };
 
-  const handleStatusChange = async (name: string, newStatus: string) => {
+  const handleStatusChange = async (serviceId: string, newStatus: string) => {
+    const service = services.find((s) => s.id === serviceId);
+    if (!service) return;
+
     if (newStatus === "rejected") {
-      setSelectedService(services.find((s) => s.id === name) || null);
+      setSelectedService(service);
       setShowRejectDialog(true);
       return;
     }
 
     try {
       setIsUpdating(true);
-      const serviceRef = doc(db, "service_requests", name);
+      const serviceRef = doc(db, "service_requests", serviceId);
       await updateDoc(serviceRef, {
         status: newStatus,
       });
 
-      // Menyimpan aktivitas terkini untuk status baru
+      // Menyimpan aktivitas terkini dengan nama pelanggan
       if (newStatus === "in_progress") {
-        saveRecentActivity(`${user?.displayName} mengambil alih perbaikan ${name}`, name);
+        saveRecentActivity(`${user?.displayName} mengambil alih perbaikan milik ${service.name}`, service.name);
       } else if (newStatus === "completed") {
-        saveRecentActivity(`${user?.displayName} telah menyelesaikan perbaikan ${name}`, name);
+        saveRecentActivity(`${user?.displayName} telah menyelesaikan perbaikan milik ${service.name}`, service.name);
       }
 
       toast.success("Status berhasil diperbarui");
@@ -116,8 +118,8 @@ export default function ServiceDashboardPage() {
         rejectedReason: rejectReason,
       });
 
-      // Menyimpan aktivitas terkini untuk penolakan
-      saveRecentActivity(`${user?.displayName} menolak perbaikan dengan alasan ${rejectReason}`, selectedService.id);
+      // Menyimpan aktivitas terkini untuk penolakan dengan nama pelanggan
+      saveRecentActivity(`${user?.displayName} menolak perbaikan milik ${selectedService.name} dengan alasan: ${rejectReason}`, selectedService.name);
 
       toast.success("Service telah ditolak");
       setShowRejectDialog(false);
@@ -132,7 +134,7 @@ export default function ServiceDashboardPage() {
   };
 
   const ServiceTable = ({ status }: { status?: string }) => {
-    const filteredServices = status ? services.filter((service) => service.status === status) : services.filter((service) => !["in_progress", "completed", "rejected"].includes(service.status));
+    const filteredServices = status ? services.filter((service) => service.status === status) : services.filter((service) => !["completed", "rejected"].includes(service.status));
 
     return (
       <Table>
@@ -156,12 +158,10 @@ export default function ServiceDashboardPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending" disabled className="disabled:cursor-not-allowed">
-                      Pending
-                    </SelectItem>
-                    <SelectItem value="in_progress" disabled className="disabled:cursor-not-allowed">Terima</SelectItem>
-                    <SelectItem value="completed">Selesai</SelectItem>
-                    <SelectItem value="rejected">Tolak</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>
@@ -193,18 +193,13 @@ export default function ServiceDashboardPage() {
         <CardContent>
           <Tabs defaultValue="active" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="active">Daftar Servis</TabsTrigger>
-              <TabsTrigger value="in_progress">Sedang Dikerjakan</TabsTrigger>
-              <TabsTrigger value="completed">Selesai</TabsTrigger>
-              <TabsTrigger value="rejected">Tolak</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected</TabsTrigger>
             </TabsList>
 
             <TabsContent value="active">
-              <ServiceTable status="active" />
-            </TabsContent>
-
-            <TabsContent value="in_progress">
-              <ServiceTable status="in_progress" />
+              <ServiceTable />
             </TabsContent>
 
             <TabsContent value="completed">
