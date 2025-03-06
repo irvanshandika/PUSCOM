@@ -1,6 +1,8 @@
 import { streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
+export const runtime = 'edge';
+
 const google = createGoogleGenerativeAI({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta",

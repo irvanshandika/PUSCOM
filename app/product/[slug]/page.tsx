@@ -7,6 +7,8 @@ import ProductDetailSkeleton from "@/src/components/ProductDetailSkeleton";
 import Navbar from "@/src/components/Navbar";
 import Footer from "@/src/components/Footer";
 
+export const runtime = 'edge';
+
 interface PageProps {
   params: Promise<{
     slug: string;

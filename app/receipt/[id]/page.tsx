@@ -2,6 +2,8 @@ import React from "react";
 import type { Metadata } from "next";
 import ServiceReceiptPage from "./main";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Service Receipt",
 };
