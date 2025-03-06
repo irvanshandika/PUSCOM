@@ -5,6 +5,8 @@ import { db } from "@/src/config/FirebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { ServiceRequest } from "@/src/types/service";
 
+export const runtime = 'edge';
+
 const google = createGoogleGenerativeAI({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
   baseURL: "https://generativelanguage.googleapis.com/v1beta",
