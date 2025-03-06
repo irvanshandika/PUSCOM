@@ -110,7 +110,7 @@ export default function ServiceReceipt() {
         <Card className="py-16">
           <CardContent className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">Data tidak ditemukan</p>
-            <Button variant="outline" onClick={() => router.push("/service")}>
+            <Button variant="outline" onClick={() => router.back()}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Kembali
             </Button>
@@ -123,7 +123,7 @@ export default function ServiceReceipt() {
   return (
     <div className="container max-w-3xl mx-auto p-4 md:p-8 space-y-4">
       <div className="print:hidden flex items-center justify-between gap-4">
-        <Button variant="outline" size="sm" onClick={() => router.push("/service")}>
+        <Button variant="outline" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Kembali
         </Button>
