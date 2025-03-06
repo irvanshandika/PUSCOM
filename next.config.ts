@@ -13,7 +13,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  output: "standalone",
   devIndicators: false
 };
 
