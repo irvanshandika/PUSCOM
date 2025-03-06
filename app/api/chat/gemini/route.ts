@@ -1,4 +1,5 @@
-import { streamText } from "ai";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { streamText, UIMessage } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export const runtime = 'edge';
@@ -48,14 +49,14 @@ Panduan Utama:
 Selalu pastikan setiap interaksi sesuai dengan panduan di atas dan fokus pada memberikan bantuan terbaik seputar komputer dan laptop.`;
 
 export async function POST(req: Request) {
-  const { messages } = await req.json();
+   const { messages }: { messages: UIMessage[] } = await req.json();
 
   // Tambahkan system prompt ke messages
   const augmentedMessages = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
 
   const result = streamText({
     model: google("gemini-2.0-pro-exp-02-05"),
-    messages: augmentedMessages,
+    messages: augmentedMessages as any,
     temperature: 0.7, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
     maxTokens: 8192, // Batasi panjang respons

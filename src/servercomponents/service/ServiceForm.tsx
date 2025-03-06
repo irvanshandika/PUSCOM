@@ -158,7 +158,7 @@ export default function ServiceRequest() {
         body: JSON.stringify({ token }),
       });
 
-      const verifyData = await verifyResponse.json();
+      const verifyData = await verifyResponse.json() as { success: boolean };
 
       if (!verifyData.success) {
         throw new Error("reCAPTCHA verification failed");
