@@ -12,6 +12,8 @@ import { Skeleton } from "@/src/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import { Input } from "@/src/components/ui/input";
 
+export const runtime = 'edge';
+
 interface Product {
   id: string;
   name: string;
