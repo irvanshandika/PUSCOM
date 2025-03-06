@@ -6,7 +6,7 @@ const RECAPTCHA_SECRET_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SECRET_KEY || '';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = await request.json() as { token: string };
     const { token } = body;
 
     const response = await fetch(
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       }
     );
 
-    const data = await response.json();
+    const data = await response.json() as { success: boolean };
 
     if (data.success) {
       return NextResponse.json({ success: true });

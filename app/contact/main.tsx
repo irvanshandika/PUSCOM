@@ -49,7 +49,10 @@ export default function ContactPage() {
         body: JSON.stringify({ token }),
       });
 
-      const verifyData = await verifyResponse.json();
+      interface ReCaptchaVerifyResponse {
+        success: boolean;
+      }
+      const verifyData = await verifyResponse.json() as ReCaptchaVerifyResponse;
 
       if (!verifyData.success) {
         throw new Error("reCAPTCHA verification failed");
