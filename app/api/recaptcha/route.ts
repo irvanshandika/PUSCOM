@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 const RECAPTCHA_SECRET_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SECRET_KEY || '';
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { token: string };
+    const body = await request.json();
     const { token } = body;
 
     const response = await fetch(
@@ -16,7 +14,7 @@ export async function POST(request: Request) {
       }
     );
 
-    const data = await response.json() as { success: boolean };
+    const data = await response.json();
 
     if (data.success) {
       return NextResponse.json({ success: true });

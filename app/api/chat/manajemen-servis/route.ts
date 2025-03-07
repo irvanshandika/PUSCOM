@@ -1,11 +1,9 @@
 // File: app/api/chat/manajemen-servis/route.ts
-import { streamText, UIMessage } from "ai";
+import { streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { db } from "@/src/config/FirebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { ServiceRequest } from "@/src/types/service";
-
-export const runtime = 'edge';
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
@@ -13,7 +11,7 @@ const google = createGoogleGenerativeAI({
 });
 
 export async function POST(req: Request) {
-  const { messages, serviceData } : { messages: UIMessage[], serviceData?: boolean } = await req.json();
+  const { messages, serviceData } = await req.json();
   
   // Jika serviceData flag ada, maka kita perlu menyiapkan konteks
   let serviceContext = "";
@@ -118,10 +116,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google("gemini-2.0-pro-exp-02-05"),
-    messages: modifiedMessages.map(msg => ({
-      role: msg.role as "user" | "assistant" | "system",
-      content: msg.content
-    })),
+    messages: modifiedMessages,
     temperature: 0.7, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
     maxTokens: 8192, // Batasi panjang respons
