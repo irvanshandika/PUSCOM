@@ -13,10 +13,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-interface ReCaptchaResponse {
-  success: boolean;
-}
-
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
 
 // Skema Zod untuk validasi
@@ -63,7 +59,7 @@ function ResetPasswordForm() {
         body: JSON.stringify({ token }),
       });
 
-      const verifyData = (await verifyResponse.json()) as ReCaptchaResponse;
+      const verifyData = await verifyResponse.json();
 
       if (!verifyData.success) {
         throw new Error("reCAPTCHA verification failed");
