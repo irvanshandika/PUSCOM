@@ -14,8 +14,6 @@ import Link from "next/link"
 import { Skeleton } from "@/src/components/ui/skeleton"
 import { cn } from "@/src/lib/utils"
 
-export const runtime = 'edge';
-
 interface ServiceData {
   name: string
   phoneNumber: string
