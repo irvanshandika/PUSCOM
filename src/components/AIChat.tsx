@@ -10,36 +10,23 @@ import { ScrollArea } from "@/src/components/ui/scroll-area";
 import { Paperclip, Send, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/src/components/ui/sheet";
 import { Textarea } from "@/src/components/ui/textarea";
-import { cn } from "@/src/lib/utils";
+// import { cn } from "@/src/lib/utils";
 import RobotIcon from "./icons/RobotIcon";
 import PersonIcon from "./icons/PersonIcon";
 import DocsIcon from "./icons/DocsIcon";
+import { RefreshCw } from "lucide-react";
 
 const md = new MarkdownIt();
 
 export default function Chat() {
-  const { messages, input, reload, error, handleInputChange, handleSubmit, setMessages } = useChat({
+  const { messages, input, reload, error, handleInputChange, handleSubmit } = useChat({
     keepLastMessageOnError: true,
     api: "/api/chat/gemini",
   });
-  const [isFirstChat, setIsFirstChat] = useState(true);
   const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (messages.length === 0 && isFirstChat) {
-      setMessages([
-        {
-          id: "welcome",
-          role: "assistant",
-          content: "Halo! Saya Jackie AI dari PUSCOM, asisten web cerdas yang siap membantu Anda dengan segala hal seputar komputer dan laptop.",
-        },
-      ]);
-      setIsFirstChat(false);
-    }
-  }, [messages, isFirstChat, setMessages]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -88,10 +75,17 @@ export default function Chat() {
         </SheetHeader>
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
+            <div className="flex flex-col justify-start max-w-[80%] rounded-2xl px-4 py-2 bg-gray-200 dark:bg-neutral-900">
+              <span className="flex gap-2 mb-1 justify-start items-start">
+                <RobotIcon className="h-5 w-5" />
+                <span>Jackie AI</span>
+              </span>
+              <div className="prose prose-sm dark:prose-invert max-w-none">Halo! Saya Jackie AI dari PUSCOM, asisten web cerdas yang siap membantu Anda dengan segala hal seputar komputer dan laptop.</div>
+            </div>
             {messages.map((m) => (
-              <div key={m.id} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
-                <div className={cn("max-w-[80%] rounded-2xl px-4 py-2", m.role === "user" ? "bg-blue-600 text-white" : "bg-muted")}>
-                  <span className={`flex gap-2 mb-1 ${m.role === "user" ? "justify-end items-end" : "justify-start items-start"}`}>
+              <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"} mb-4`}>
+                <div className={`flex flex-col max-w-[80%] rounded-2xl px-4 py-2 ${m.role === "user" ? "bg-blue-500 text-white rounded-br-none" : "bg-gray-200 dark:bg-neutral-900 rounded-bl-none"}`}>
+                  <span className="flex gap-2 mb-1 items-center">
                     {m.role === "user" ? <PersonIcon className="h-5 w-5" /> : <RobotIcon className="h-5 w-5" />}
                     <span>{m.role === "user" ? "Anda" : "Jackie AI"}</span>
                   </span>
@@ -105,6 +99,11 @@ export default function Chat() {
                         <iframe key={`${m.id}-${index}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />
                       ) : null
                     )}
+                  <div className={`flex ${m.role === "user" ? "hidden" : "block"}`}>
+                    <Button variant="outline" size="sm" className="mt-2 ml-[-2px]" onClick={() => reload()}>
+                      <RefreshCw className="h-4 w-4" /> Regenerate
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
