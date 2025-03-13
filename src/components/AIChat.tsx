@@ -75,7 +75,7 @@ export default function Chat() {
         </SheetHeader>
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
-            <div className="flex flex-col justify-start max-w-[80%] rounded-2xl px-4 py-2 bg-gray-200 dark:bg-neutral-900">
+            <div className="flex flex-col justify-start max-w-[80%] rounded-2xl px-4 py-2 bg-gray-200 dark:bg-neutral-900 rounded-bl-none">
               <span className="flex gap-2 mb-1 justify-start items-start">
                 <RobotIcon className="h-5 w-5" />
                 <span>Jackie AI</span>
@@ -90,15 +90,23 @@ export default function Chat() {
                     <span>{m.role === "user" ? "Anda" : "Jackie AI"}</span>
                   </span>
                   <div dangerouslySetInnerHTML={{ __html: md.render(m.content) }} className="prose prose-sm dark:prose-invert max-w-none" />
-                  {m?.experimental_attachments
-                    ?.filter((attachment) => attachment?.contentType?.startsWith("image/") || attachment?.contentType?.startsWith("application/pdf"))
-                    .map((attachment, index) =>
-                      attachment.contentType?.startsWith("image/") ? (
-                        <Image key={`${m.id}-${index}`} src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />
-                      ) : attachment.contentType?.startsWith("application/pdf") ? (
-                        <iframe key={`${m.id}-${index}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />
-                      ) : null
-                    )}
+                  {m?.experimental_attachments?.map((attachment, index) => {
+                    if (attachment.contentType?.startsWith("image/")) {
+                      return <Image key={`${m.id}-${index}`} src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />;
+                    }
+                    if (attachment.contentType?.startsWith("application/pdf")) {
+                      return <iframe key={`${m.id}-${index}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />;
+                    }
+                    // For all other file types
+                    return (
+                      <div key={`${m.id}-${index}`} className="mt-2 p-3 bg-muted rounded-md">
+                        <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm hover:underline">
+                          <DocsIcon className="h-4 w-4" />
+                          {attachment.name || `File ${index + 1}`}
+                        </a>
+                      </div>
+                    );
+                  })}
                   <div className={`flex ${m.role === "user" ? "hidden" : "block"}`}>
                     <Button variant="outline" size="sm" className="mt-2 ml-[-2px]" onClick={() => reload()}>
                       <RefreshCw className="h-4 w-4" /> Regenerate
