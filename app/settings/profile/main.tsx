@@ -12,17 +12,16 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updatePassword, updateProfile } from "firebase/auth";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
-import { Switch } from "@/src/components/ui/switch";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/src/components/ui/form";
 import { toast } from "react-hot-toast";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
-import { Label } from "@/src/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/src/components/ui/dialog";
 import { Eye, EyeOff, Upload, AlertTriangle } from "lucide-react";
 import bcrypt from "bcryptjs";
 import Image from "next/image";
+import DeleteAccountSection from "./DeleteAccount";
 
 // Profile schema definition
 const profileSchema = z.object({
@@ -317,7 +316,9 @@ function ProfilePage() {
             Password
           </TabsTrigger>
           <TabsTrigger value="danger" className="flex justify-center items-center">
-            Danger Area
+            <span className="text-red-500">
+              Danger Area
+            </span>
             <AlertTriangle className="h-4 w-4 text-red-500 ml-2" />
           </TabsTrigger>
         </TabsList>
@@ -507,35 +508,12 @@ function ProfilePage() {
         <TabsContent value="danger" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Configure how you receive notifications.</CardDescription>
+              <CardTitle>Danger Area</CardTitle>
+              <CardDescription>This area is for advanced users only. Please be careful when making changes here.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <Switch id="marketing" />
-                <div className="space-y-1">
-                  <Label htmlFor="marketing">Marketing emails</Label>
-                  <p className="text-sm text-muted-foreground">Receive emails about new products, features, and more.</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Switch id="social" />
-                <div className="space-y-1">
-                  <Label htmlFor="social">Social notifications</Label>
-                  <p className="text-sm text-muted-foreground">Receive notifications when someone mentions you or replies to your messages.</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Switch id="security" defaultChecked />
-                <div className="space-y-1">
-                  <Label htmlFor="security">Security emails</Label>
-                  <p className="text-sm text-muted-foreground">Receive emails about your account security and privacy.</p>
-                </div>
-              </div>
+              <DeleteAccountSection />
             </CardContent>
-            <CardFooter>
-              <Button>Save notification settings</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
