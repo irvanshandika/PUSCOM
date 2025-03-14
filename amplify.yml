@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - bun update
+        - bun install
     build:
       commands:
         - bun run build
