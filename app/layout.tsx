@@ -2,8 +2,6 @@ import { ThemeProvider } from "@/src/components/theme-provider";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
@@ -63,8 +61,6 @@ export default function RootLayout({
         <meta name="google-site-verification" content="OJGaC9hOIiPX7zJ1nmCKlPbHQ656ytp6atR4V_F8obc" />
       </head>
       <body className="antialiased font-adobe-clean">
-        <SpeedInsights />
-        <Analytics />
         <Toaster position="top-right" />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           {children}
