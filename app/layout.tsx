@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s | Jual Beli, Servis & Spare Part Komputer",
   },
   description: "Solusi Lengkap untuk Komputer & Laptop. Jual Beli, Servis Professional, dan Spare Part Berkualitas di Yogyakarta.",
-  keywords: ["jual beli komputer", "laptop yogyakarta", "servis komputer", "spare part komputer", "toko komputer terpercaya"],
+  keywords: ["jual beli komputer", "laptop yogyakarta", "servis komputer", "spare part komputer", "toko komputer terpercaya", "toko laptop yogyakarta"],
   openGraph: {
     type: "website",
     locale: "id_ID",
@@ -57,8 +57,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preload" href="https://use.typekit.net/hah7vzn.css" />
         <meta name="google-site-verification" content="OJGaC9hOIiPX7zJ1nmCKlPbHQ656ytp6atR4V_F8obc" />
+        <link rel="preload" href="https://use.typekit.net/hah7vzn.css" />
+        <meta name="ahrefs-site-verification" content="56e3eacd6834c3da16a90f901d69046296782f47f3cb0a27b5c80cbbcdd8a2d1" />
+        <script src="https://analytics.ahrefs.com/analytics.js" data-key="AurRtBIx16qnfNxIz0ahVA" async></script>
       </head>
       <body className="antialiased font-adobe-clean">
         <Toaster position="top-right" />
