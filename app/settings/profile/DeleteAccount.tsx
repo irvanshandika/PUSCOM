@@ -43,8 +43,8 @@ export default function DeleteAccountSection() {
 
       // Optionally, redirect user to login or home page
       setTimeout(() => {
-        router.push("/login");
-      }, 3000);
+        router.push("/");
+      }, 100);
     } catch (error) {
       console.error("Error deleting account:", error);
       toast.error("There was an error deleting your account. Please try again.");
