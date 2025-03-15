@@ -10,11 +10,11 @@ import { ScrollArea } from "@/src/components/ui/scroll-area";
 import { Paperclip, Send, X } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/src/components/ui/sheet";
 import { Textarea } from "@/src/components/ui/textarea";
-// import { cn } from "@/src/lib/utils";
 import RobotIcon from "./icons/RobotIcon";
 import PersonIcon from "./icons/PersonIcon";
 import DocsIcon from "./icons/DocsIcon";
 import { RefreshCw } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 
 const md = new MarkdownIt();
 
@@ -92,7 +92,21 @@ export default function Chat() {
                   <div dangerouslySetInnerHTML={{ __html: md.render(m.content) }} className="prose prose-sm dark:prose-invert max-w-none" />
                   {m?.experimental_attachments?.map((attachment, index) => {
                     if (attachment.contentType?.startsWith("image/")) {
-                      return <Image key={`${m.id}-${index}`} src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />;
+                      return (
+                        <div key={`${m.id}-${index}`}>
+                          <Dialog>
+                            <DialogTrigger>
+                              <Image key={`${m.id}-${index}`} src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{attachment.name || `Image ${index + 1}`}</DialogTitle>
+                              </DialogHeader>
+                              <Image key={`${m.id}-${index}`} src={attachment.url || "/placeholder.svg"} width={800} height={800} alt={attachment.name ?? `attachment-${index}`} className="rounded-md bg-auto bg-no-repeat bg-center" />
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      );
                     }
                     if (attachment.contentType?.startsWith("application/pdf")) {
                       return <iframe key={`${m.id}-${index}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${index}`} className="mt-2 rounded-md" />;
