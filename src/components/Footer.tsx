@@ -5,9 +5,8 @@ import Link from "next/link";
 const navigation = {
   main: [
     { name: "Beranda", href: "/" },
-    { name: "Produk", href: "/products" },
-    { name: "Layanan", href: "/services" },
-    { name: "Tentang", href: "/about" },
+    { name: "Produk", href: "/catalog" },
+    { name: "Layanan", href: "/service" },
     { name: "Kontak", href: "/contact" },
   ],
   social: [
