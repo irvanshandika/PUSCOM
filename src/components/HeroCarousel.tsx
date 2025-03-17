@@ -35,7 +35,8 @@ export default function HeroCarousel() {
                     alt={`Image ${index + 1}`} 
                     fill 
                     className="object-cover rounded-xl" 
-                    priority 
+                    fetchPriority="low"
+                    loading="lazy" 
                     sizes="(max-width: 640px) 280px, (max-width: 768px) 330px, (max-width: 1024px) 380px, 420px"
                   />
                 </CardContent>
