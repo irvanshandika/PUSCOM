@@ -4,6 +4,7 @@ import FeaturesSection from "@/src/sections/FeaturesSection";
 import CTASection from "@/src/sections/CTASection";
 import AIChat from "@/src/components/AIChat";
 import Footer from "@/src/components/Footer";
+import Testimonials from "@/src/sections/Testimonials";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
+      <Testimonials />
       <CTASection />
       <AIChat />
       <Footer />

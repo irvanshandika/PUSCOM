@@ -35,7 +35,7 @@ const AIChat: React.FC = () => {
       fileInputRef.current.value = "";
     }
   };
-  
+
   // Fungsi untuk menghapus format markdown dari teks
   const removeMarkdownFormatting = (text: string) => {
     // Menghapus format bold (**text**)
@@ -94,12 +94,7 @@ const AIChat: React.FC = () => {
                       <span className="font-medium text-sm">{message.role === "user" ? "Anda" : "PUSCOM AI"}</span>
                     </div>
                     {/* Menerapkan fungsi removeMarkdownFormatting pada konten pesan */}
-                    <p className="text-sm whitespace-pre-wrap">
-                      {message.role === "assistant" 
-                        ? removeMarkdownFormatting(message.content)
-                        : message.content
-                      }
-                    </p>
+                    <p className="text-sm whitespace-pre-wrap">{message.role === "assistant" ? removeMarkdownFormatting(message.content) : message.content}</p>
                     {message?.experimental_attachments?.map((attachment, index) => {
                       if (attachment.contentType?.startsWith("image/")) {
                         return (
