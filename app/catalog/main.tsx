@@ -1,22 +1,22 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useState, useEffect } from "react";
 import { collection, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
-import Image from "next/image";
-import Link from "next/link";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
-import { Button } from "@/src/components/ui/button";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import ProductCard from "@/src/components/catalog/ProductCard";
+import ProductCardSkeleton from "@/src/components/catalog/ProductCardSkeleton";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { Skeleton } from "@/src/components/ui/skeleton";
 
 type Product = {
   id: string;
   name: string;
   slug: string;
+  description: string;
   category: string;
   price: number;
   stock: number;
@@ -41,6 +41,7 @@ export default function CatalogMain() {
   });
 
   const [searchValue, setSearchValue] = useState(""); // State untuk menangani input pencarian
+  const [sortOption, setSortOption] = useState(""); // State untuk menangani pilihan urutan
   const [debouncedSearch, setDebouncedSearch] = useState(""); // State untuk pencarian setelah delay
 
   // Debounce logic
@@ -81,7 +82,7 @@ export default function CatalogMain() {
       }
 
       const querySnapshot = await getDocs(q);
-      const fetchedProducts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Product);
+      const fetchedProducts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Product));
 
       if (direction === "prev") {
         fetchedProducts.reverse();
@@ -103,101 +104,79 @@ export default function CatalogMain() {
   };
 
   useEffect(() => {
+    const sorted = [...products];
+
+    switch (sortOption) {
+      case "name-asc":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "price-desc":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+      case "price-asc":
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+      default:
+        // No sorting
+        break;
+    }
+
+    setProducts(sorted);
+  }, [sortOption]);
+
+  useEffect(() => {
     fetchProducts("initial");
   }, [filters, pagination.currentPage, debouncedSearch]); // Gunakan debouncedSearch di sini
 
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    setPagination((prev) => ({ ...prev, currentPage: 1, lastVisibleDoc: null, firstVisibleDoc: null }));
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[...Array(12)].map((_, index) => (
-            <div key={index} className="space-y-2">
-              <Skeleton className="w-full aspect-square rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const handleSort = (value: string) => {
+    setSortOption(value);
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8 pt-32 pb-20 md:px-8">
-      <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex-1 w-full md:w-auto">
-          <div className="relative">
-            <Input
-              placeholder="Cari Produk"
-              className="pl-10"
-              onChange={(e) => setSearchValue(e.target.value)} // Update searchValue
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+    <div className="container mx-auto px-4 py-8 pt-32">
+      <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+        <div className="flex justify-center items-center">
+          <h1 className="text-2xl font-bold">Katalog Produk</h1>
+        </div>
+
+        {/* Search and filter section */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-center w-full">
+          <div className="relative w-full md:w-[300px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input placeholder="Cari produk..." className="pl-10" value={searchValue} onChange={handleSearch} />
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-[200px]">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <Select value={sortOption} onValueChange={handleSort}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Urutkan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name-asc">Nama (A-Z)</SelectItem>
+                <SelectItem value="price-desc">Harga (Tertinggi)</SelectItem>
+                <SelectItem value="price-asc">Harga (Terendah)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
-          <Select onValueChange={(value) => handleFilterChange("category", value)} value={filters.category}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Kategori" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua</SelectItem> {/* Default value */}
-              {["Laptop", "Komputer", "Spare Part"].map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select onValueChange={(value) => handleFilterChange("sort", value as SortOption)} value={filters.sort}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Urutkan" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="nameAsc">Nama (A-Z)</SelectItem>
-              <SelectItem value="nameDesc">Nama (Z-A)</SelectItem>
-              <SelectItem value="priceAsc">Harga (Terendah)</SelectItem>
-              <SelectItem value="priceDesc">Harga (Tertinggi)</SelectItem>
-            </SelectContent>
-          </Select>
+
+        {/* Products grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
+          {loading ? Array.from({ length: 8 }).map((_, index) => <ProductCardSkeleton key={`skeleton-${index}`} />) : products.map((product) => <ProductCard key={product.id} product={product} />)}
+
+          {!loading && products.length === 0 && (
+            <div className="col-span-full text-center py-12">
+              <p className="text-xl text-muted-foreground">Tidak ada produk yang ditemukan.</p>
+              <p className="text-sm text-muted-foreground mt-2">Coba gunakan kata kunci pencarian yang berbeda.</p>
+            </div>
+          )}
         </div>
       </div>
-
-      {products.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-xl text-gray-600">Tidak ada produk ditemukan</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <Link href={`/product/${product.slug}`} key={product.id} className="group">
-              <div className="relative aspect-square mb-2 overflow-hidden rounded-lg bg-gray-100">
-                <Image src={product.images[0] || ""} alt={product.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-              <h3 className="text-sm font-medium truncate">{product.name}</h3>
-              <div className="flex justify-between items-center text-sm">
-                <p className="font-semibold">Rp {product.price.toLocaleString()}</p>
-                <span className="text-green-600">Stok: {product.stock}</span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <div className="flex justify-center mt-8 space-x-4">
-        <Button variant="outline" size="sm" disabled={pagination.currentPage === 1} onClick={() => fetchProducts("prev")}>
-          <ChevronLeft className="mr-2 h-4 w-4" /> Sebelumnya
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => fetchProducts("next")}>
-          Selanjutnya <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-      <div className="text-center mt-4 text-sm text-gray-600">Halaman {pagination.currentPage}</div>
     </div>
   );
 }
