@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
@@ -58,7 +57,7 @@ export default function SignInPage() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
 
       toast.dismiss(loadingToast);
-      toast.success(`Selamat Datang, ${data.displayName}!`);
+      toast.success(`Selamat Datang Kembali, ${data.displayName}!`);
       router.push("/");
     } catch (error: any) {
       toast.dismiss(loadingToast);
@@ -92,7 +91,7 @@ export default function SignInPage() {
       }
 
       toast.dismiss(loadingToast);
-      toast.success(`Selamat Datang, ${result.user.displayName}!`);
+      toast.success(`Selamat Datang Kembali, ${result.user.displayName}!`);
       router.push("/");
     } catch (error: any) {
       toast.dismiss(loadingToast);
