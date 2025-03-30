@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
@@ -11,8 +12,11 @@ import Image from "next/image";
 import DocsIcon from "./icons/DocsIcon";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { getAuth } from "firebase/auth";
+import { app } from "@/src/config/FirebaseConfig";
 
 const AIChat: React.FC = () => {
+  const [user, setUser] = React.useState<any>(null);
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { messages, input, reload, error, handleInputChange, handleSubmit } = useChat({
@@ -22,6 +26,14 @@ const AIChat: React.FC = () => {
   const [files, setFiles] = useState<FileList | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    const authInstance = getAuth(app);
+    const unsubscribe = authInstance.onAuthStateChanged((user) => {
+      setUser(user || null);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -73,7 +85,7 @@ const AIChat: React.FC = () => {
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
               <Bot size={20} className="text-blue-500" />
-              <SheetTitle className="text-lg font-semibold text-foreground">PUSCOM AI Assistant</SheetTitle>
+              <SheetTitle className="text-lg font-semibold text-foreground">Jackie AI Assistant</SheetTitle>
             </div>
           </div>
 
@@ -82,7 +94,7 @@ const AIChat: React.FC = () => {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-6 opacity-70">
                 <Bot size={48} className="mb-2 text-blue-500" />
-                <h3 className="text-xl font-medium mb-2">Selamat datang di PUSCOM AI</h3>
+                <h3 className="text-xl font-medium mb-2">Selamat datang di Jackie AI</h3>
                 <p className="text-muted-foreground">Asisten AI kami siap membantu Anda untuk menemukan komputer, laptop, spare part, atau servis yang sesuai dengan kebutuhan Anda.</p>
               </div>
             ) : (
@@ -90,8 +102,18 @@ const AIChat: React.FC = () => {
                 <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"} mb-4`}>
                   <div className={cn("rounded-xl p-3", message.role === "user" ? "bg-blue-500 text-foreground rounded-tr-none" : "bg-muted text-foreground rounded-tl-none")}>
                     <div className="flex items-center gap-2 mb-1">
-                      {message.role === "assistant" ? <Bot size={16} className="text-blue-500" /> : <User size={16} />}
-                      <span className="font-medium text-sm">{message.role === "user" ? "Anda" : "PUSCOM AI"}</span>
+                      {message.role === "assistant" ? (
+                        <Bot size={16} className="text-blue-500" />
+                      ) : user?.photoURL ? (
+                        <>
+                          <Image src={user.photoURL} className="w-6 h-6 rounded-full" alt={user.displayName} width={0} height={0} />
+                        </>
+                      ) : (
+                        <>
+                          <User size={16} />
+                        </>
+                      )}
+                      <span className="font-medium text-sm">{message.role === "user" ? user?.displayName || "User" : "Jackie AI"}</span>
                     </div>
                     {/* Menerapkan fungsi removeMarkdownFormatting pada konten pesan */}
                     <p className="text-sm whitespace-pre-wrap">{message.role === "assistant" ? removeMarkdownFormatting(message.content) : message.content}</p>
