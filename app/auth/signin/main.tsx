@@ -17,7 +17,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 const signInSchema = z.object({
-  displayName: z.string(),
   email: z.string().email("Email tidak valid"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
@@ -57,7 +56,8 @@ export default function SignInPage() {
       await signInWithEmailAndPassword(auth, data.email, data.password);
 
       toast.dismiss(loadingToast);
-      toast.success(`Selamat Datang Kembali, ${data.displayName}!`);
+      const user = auth.currentUser;
+      toast.success(`Selamat Datang Kembali, ${user?.displayName || data.email}!`);
       router.push("/");
     } catch (error: any) {
       toast.dismiss(loadingToast);
