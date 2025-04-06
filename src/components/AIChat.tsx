@@ -48,24 +48,27 @@ const AIChat: React.FC = () => {
     }
   };
 
-  // Fungsi untuk menghapus format markdown dari teks
-  const removeMarkdownFormatting = (text: string) => {
-    // Menghapus format bold (**text**)
-    let cleanText = text.replace(/\*\*(.*?)\*\*/g, "$1");
-    // Menghapus format italic (*text*)
-    cleanText = cleanText.replace(/\*(.*?)\*/g, "$1");
-    // Menghapus format code (`text`)
-    cleanText = cleanText.replace(/`([^`]*)`/g, "$1");
-    // Menghapus format heading (#, ##, ###)
-    cleanText = cleanText.replace(/^#+\s+/gm, "");
-    // Menghapus format link [text](url)
-    cleanText = cleanText.replace(/\[(.*?)\]\((.*?)\)/g, "$1");
-    // Menghapus format list (- atau *)
-    cleanText = cleanText.replace(/^[\-\*]\s+/gm, "");
-    // Menghapus format list dengan angka (1. 2. dst)
-    cleanText = cleanText.replace(/^\d+\.\s+/gm, "");
+  // Apply markdown formatting to the message content
+  const applyMarkdownFormatting = (text: string) => {
+    // Convert bold (**text**)
+    let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Convert italic (*text*)
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    // Convert code (`text`)
+    formattedText = formattedText.replace(/`([^`]*)`/g, '<code>$1</code>');
+    // Convert headings (#, ##, ###)
+    formattedText = formattedText.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    formattedText = formattedText.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    formattedText = formattedText.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    // Convert links [text](url)
+    formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+    // Convert lists (- or *)
+    formattedText = formattedText.replace(/^\* (.*$)/gim, '<ul><li>$1</li></ul>');
+    formattedText = formattedText.replace(/^\- (.*$)/gim, '<ul><li>$1</li></ul>');
+    // Convert numbered lists (1. 2. etc)
+    formattedText = formattedText.replace(/^\d+\. (.*$)/gim, '<ol><li>$1</li></ol>');
 
-    return cleanText;
+    return formattedText;
   };
 
   // Auto scroll to bottom when messages change
@@ -115,8 +118,8 @@ const AIChat: React.FC = () => {
                       )}
                       <span className="font-medium text-sm">{message.role === "user" ? user?.displayName || "User" : "Jackie AI"}</span>
                     </div>
-                    {/* Menerapkan fungsi removeMarkdownFormatting pada konten pesan */}
-                    <p className="text-sm whitespace-pre-wrap">{message.role === "assistant" ? removeMarkdownFormatting(message.content) : message.content}</p>
+                    {/* Apply markdown formatting to assistant messages */}
+                    <p className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.role === "assistant" ? applyMarkdownFormatting(message.content) : message.content }} />
                     {message?.experimental_attachments?.map((attachment, index) => {
                       if (attachment.contentType?.startsWith("image/")) {
                         return (
