@@ -1,6 +1,6 @@
 'use client'
 import React from "react";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/src/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem } from "@/src/components/ui/carousel";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Star } from "lucide-react";
 import Image from "next/image";
@@ -92,27 +92,27 @@ const Testimonials = () => {
         >
           <CarouselContent className="-ml-2 md:-ml-4">
             {testimonialData.map((testimonial) => (
-              <CarouselItem key={testimonial.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+              <CarouselItem key={testimonial.id} className="pl-2 md:pl-4 basis-full sm:basis-2/3 md:basis-1/2 lg:basis-1/3">
                 <div className="h-full">
                   <Card className="h-full border-none shadow-md bg-white/70 dark:bg-black/30 backdrop-blur-lg border border-white/20 dark:border-white/10">
-                    <CardContent className="p-6 flex flex-col h-full">
+                    <CardContent className="p-4 sm:p-6 flex flex-col h-full">
                       <div className="mb-4">
                         <RatingStars rating={testimonial.rating} />
                       </div>
-                      <blockquote className="flex-grow italic mb-6">
+                      <blockquote className="flex-grow italic mb-6 text-base sm:text-lg">
                         &ldquo;{testimonial.quote}&rdquo;
                       </blockquote>
                       <div className="flex items-center gap-3 mt-auto">
                         <Image
                           src={testimonial.image}
                           alt={testimonial.name}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-[hsl(var(--puscom))]"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border-2 border-[hsl(var(--puscom))]"
                           width={48}
                           height={48}
                         />
                         <div>
-                          <h4 className="font-semibold">{testimonial.name}</h4>
-                          <p className="text-sm text-foreground/70">{testimonial.role}</p>
+                          <h4 className="font-semibold text-sm sm:text-base">{testimonial.name}</h4>
+                          <p className="text-xs sm:text-sm text-foreground/70">{testimonial.role}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -121,10 +121,7 @@ const Testimonials = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="flex justify-center gap-2 mt-8">
-            <CarouselPrevious />
-            <CarouselNext />
-          </div>
+          {/* Removed CarouselPrevious and CarouselNext buttons for a cleaner mobile look */}
         </Carousel>
 
         <style jsx global>{`
