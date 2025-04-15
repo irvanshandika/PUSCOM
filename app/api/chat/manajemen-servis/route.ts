@@ -115,11 +115,11 @@ export async function POST(req: Request) {
   ];
 
   const result = streamText({
-    model: google("gemini-2.5-pro-exp-03-25"),
+    model: google("gemini-2.0-flash"),
     messages: modifiedMessages,
-    temperature: 0.7, // Seimbang antara kreativitas dan konsistensi
+    temperature: 0.1, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
-    maxTokens: 8192, // Batasi panjang respons
+    maxTokens: 65536, // Batasi panjang respons
   });
 
   return result.toDataStreamResponse();
