@@ -92,6 +92,33 @@ const AIChat: React.FC = () => {
             </div>
           </div>
 
+          {/* Contoh Prompt Komputer - Dropdown */}
+          <div className="px-4 pt-3 pb-1">
+            <label htmlFor="prompt-dropdown" className="block text-xs font-medium mb-1 text-muted-foreground">Contoh Prompt</label>
+            <select
+              id="prompt-dropdown"
+              className="w-full border rounded-md p-2 text-sm bg-muted focus:outline-none focus:ring-2 focus:ring-blue-300"
+              defaultValue=""
+              onChange={e => {
+                if (e.target.value) {
+                  handleInputChange({ target: { value: e.target.value } } as any);
+                }
+              }}
+            >
+              <option value="" disabled>Pilih contoh prompt...</option>
+              <option value="Cara mengatasi laptop lemot">Cara mengatasi laptop lemot</option>
+              <option value="Bagaimana menghapus virus di komputer?">Bagaimana menghapus virus di komputer?</option>
+              <option value="Kenapa komputer sering blue screen?">Kenapa komputer sering blue screen?</option>
+              <option value="Tips merawat baterai laptop">Tips merawat baterai laptop</option>
+              <option value="Cara install ulang Windows 10">Cara install ulang Windows 10</option>
+              <option value="Penjelasan tentang SSD vs HDD">Penjelasan tentang SSD vs HDD</option>
+              <option value="Bagaimana memperbaiki keyboard error">Bagaimana memperbaiki keyboard error</option>
+              <option value="Cara cek kesehatan RAM">Cara cek kesehatan RAM</option>
+              <option value="Solusi komputer overheat">Solusi komputer overheat</option>
+              <option value="Cara backup data penting">Cara backup data penting</option>
+            </select>
+          </div>
+
           {/* Messages container */}
           <div className="flex-grow overflow-y-auto p-4 space-y-4">
             {messages.length === 0 ? (
