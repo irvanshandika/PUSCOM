@@ -12,10 +12,10 @@ const google = createGoogleGenerativeAI({
 
 export async function POST(req: Request) {
   const { messages, serviceData } = await req.json();
-  
+
   // Jika serviceData flag ada, maka kita perlu menyiapkan konteks
   let serviceContext = "";
-  
+
   if (serviceData) {
     try {
       // Ambil data servis dari Firestore
@@ -26,16 +26,16 @@ export async function POST(req: Request) {
         id: doc.id,
         ...doc.data(),
       })) as ServiceRequest[];
-      
+
       // Rekap status
-      const pending = servicesData.filter(s => s.status === "pending").length;
-      const inProgress = servicesData.filter(s => s.status === "in_progress").length;
-      const completed = servicesData.filter(s => s.status === "completed").length;
-      const rejected = servicesData.filter(s => s.status === "rejected").length;
-      
+      const pending = servicesData.filter((s) => s.status === "pending").length;
+      const inProgress = servicesData.filter((s) => s.status === "in_progress").length;
+      const completed = servicesData.filter((s) => s.status === "completed").length;
+      const rejected = servicesData.filter((s) => s.status === "rejected").length;
+
       // Analisa kerusakan umum
-      const damageDescriptions = servicesData.map(s => s.damage);
-      
+      const damageDescriptions = servicesData.map((s) => s.damage);
+
       // Persiapkan konteks untuk AI
       serviceContext = `
       # KONTEKS DATA SERVIS PUSCOM
@@ -48,7 +48,10 @@ export async function POST(req: Request) {
       - Ditolak: ${rejected}
       
       ## Data Servis Terbaru (5 Terakhir)
-      ${servicesData.slice(0, 5).map((service, index) => `
+      ${servicesData
+        .slice(0, 5)
+        .map(
+          (service, index) => `
       ### Servis #${index + 1}
       - ID: ${service.id}
       - Nama Pelanggan: ${service.name}
@@ -57,11 +60,13 @@ export async function POST(req: Request) {
       - Model: ${service.model || "Tidak disebutkan"}
       - Status: ${service.status}
       - Deskripsi Kerusakan: "${service.damage}"
-      - Tanggal Servis: ${new Date(service.date).toLocaleDateString('id-ID')}
-      `).join('\n')}
+      - Tanggal Servis: ${new Date(service.date).toLocaleDateString("id-ID")}
+      `
+        )
+        .join("\n")}
       
       ## Semua Deskripsi Kerusakan
-      ${damageDescriptions.map((desc, i) => `${i+1}. "${desc}"`).join('\n')}
+      ${damageDescriptions.map((desc, i) => `${i + 1}. "${desc}"`).join("\n")}
       `;
     } catch (error) {
       console.error("Error fetching service data for AI context:", error);
@@ -109,13 +114,10 @@ export async function POST(req: Request) {
   `;
 
   // Tambahkan system prompt sebagai konteks untuk AI
-  const modifiedMessages = [
-    { role: "system", content: systemPrompt },
-    ...messages
-  ];
+  const modifiedMessages = [{ role: "system", content: systemPrompt }, ...messages];
 
   const result = streamText({
-    model: google("gemini-2.0-flash"),
+    model: google("gemini-2.5-flash-preview-04-17"),
     messages: modifiedMessages,
     temperature: 0.1, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan

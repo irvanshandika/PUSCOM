@@ -67,12 +67,9 @@ function DashboardPage() {
             </header>
 
             <div className="space-y-8">
-              {/* Total Servis */}
               <ChartServicesComponent />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total pengguna */}
                 <TotalUsers />
-                {/* Total Produk */}
                 <TotalProducts />
               </div>
 
@@ -81,7 +78,6 @@ function DashboardPage() {
 
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md">
                   <h2 className="text-xl font-semibold mb-4">Ringkasan</h2>
-                  {/* Konten ringkasan tambahan */}
                 </div>
               </div>
             </div>

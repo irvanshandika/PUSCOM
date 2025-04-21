@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   const augmentedMessages = [{ role: "system", content: SYSTEM_PROMPT }, ...messages];
 
   const result = streamText({
-    model: google("gemini-2.0-flash"),
+    model: google("gemini-2.5-flash-preview-04-17"),
     messages: augmentedMessages,
     temperature: 1, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
