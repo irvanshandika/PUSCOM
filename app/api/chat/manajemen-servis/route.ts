@@ -1,4 +1,3 @@
-// File: app/api/chat/manajemen-servis/route.ts
 import { streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { db } from "@/src/config/FirebaseConfig";
