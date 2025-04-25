@@ -2,6 +2,7 @@
 import { Button } from "@/src/components/ui/button";
 import { ArrowRight, Laptop, Settings, Cpu } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
+import Image from "next/image";
 
 const FeaturesSection = () => {
   const categories = [
@@ -62,15 +63,17 @@ const FeaturesSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <div 
               key={category.title}
               className="group relative rounded-2xl overflow-hidden bg-white/70 dark:bg-black/30 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-md hover:shadow-lg transition-all duration-300"
             >
               <div className="absolute inset-0 opacity-90 group-hover:opacity-80 transition-opacity duration-300">
-                <img 
+                <Image 
                   src={category.image} 
                   alt={category.title}
+                  width={0}
+                  height={0}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
