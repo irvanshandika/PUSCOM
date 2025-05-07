@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { X, Maximize2, Minimize2, Send, Paperclip, Loader2, Bot, User, RefreshCw } from "lucide-react";
+import { X, Maximize2, Minimize2, Send, Paperclip, Bot, User, RefreshCw } from "lucide-react";
 import Draggable from "react-draggable";
 import { useChat } from "@ai-sdk/react";
 import { cn } from "@/src/lib/utils";
