@@ -46,7 +46,7 @@ const LocationMap = () => {
             </div>
             <div>
               <h3 className="font-semibold">Alamat Kami</h3>
-              <p className="text-foreground/70">Pusat Komputer, Bogor, Indonesia</p>
+              <p className="text-foreground/70">Demangan, Gondokusuman, D.I Yogyakarta, Indonesia</p>
             </div>
           </div>
 
