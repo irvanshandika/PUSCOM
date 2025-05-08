@@ -14,9 +14,10 @@ import DocsIcon from "@/src/components/icons/DocsIcon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import { getAuth } from "firebase/auth";
 import { app } from "@/src/config/FirebaseConfig";
+import { motion, AnimatePresence } from "framer-motion";
 
 const JackieUI: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false); // Changed to false for initial state
   const [isMaximized, setIsMaximized] = useState(false);
   const [isDraggable, setIsDraggable] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -26,7 +27,7 @@ const JackieUI: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Menggunakan useChat untuk API chat
+  // Using useChat for chat API
   const { messages, input, reload, error, handleInputChange, handleSubmit } = useChat({
     keepLastMessageOnError: true,
     api: "/api/chat/gemini",
@@ -92,39 +93,133 @@ const JackieUI: React.FC = () => {
     return formattedText;
   };
 
-  // If not visible, show only the trigger button
-  if (!isVisible) {
-    return (
-      <Button onClick={toggleChatVisibility} className="fixed bottom-4 right-4 z-50 rounded-full h-14 w-14 bg-blue-500 hover:bg-blue-600 text-white shadow-lg">
-        <span className="sr-only">Buka Jackie UI</span>
-        <Bot size={24} />
-      </Button>
-    );
-  }
+  // Animation variants for the chat button
+  const chatButtonVariants = {
+    hidden: { scale: 0, opacity: 0, rotate: -180 },
+    visible: { 
+      scale: 1, 
+      opacity: 1, 
+      rotate: 0,
+      transition: { 
+        type: "spring", 
+        stiffness: 260, 
+        damping: 20 
+      }
+    },
+    exit: { 
+      scale: 0, 
+      opacity: 0, 
+      rotate: 180,
+      transition: { 
+        duration: 0.3 
+      }
+    }
+  };
+
+  // Animation variants for the chat window
+  const chatWindowVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 50, 
+      scale: 0.9 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 300, 
+        damping: 25 
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: 20, 
+      scale: 0.95,
+      transition: { 
+        duration: 0.2 
+      }
+    }
+  };
+
+  // Animation variants for maximized window
+  const maximizedVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 200, 
+        damping: 30 
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      scale: 0.9,
+      transition: { 
+        duration: 0.2 
+      }
+    }
+  };
+
+  // Button to open the chat
+  const chatButton = (
+    <AnimatePresence mode="wait">
+      {!isVisible && (
+        <motion.div
+          key="chat-button"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={chatButtonVariants}
+          className="fixed bottom-4 right-4 z-50"
+        >
+          <Button 
+            onClick={toggleChatVisibility} 
+            className="rounded-full h-14 w-14 bg-blue-500 hover:bg-blue-600 text-white shadow-lg"
+          >
+            <span className="sr-only">Buka Jackie UI</span>
+            <Bot size={24} />
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 
   const chatWindow = (
     <Card
-      className={cn("flex flex-col overflow-hidden transition-all duration-300 shadow-xl border bg-card", isMaximized ? "fixed inset-0 rounded-none h-full w-full" : "w-[350px] sm:w-[380px] md:w-[420px] h-[500px] md:h-[550px] rounded-lg")}>
+      className={cn("flex flex-col overflow-hidden transition-all duration-300 shadow-xl border bg-card", 
+        isMaximized ? "fixed inset-0 rounded-none h-full w-full" : "w-[350px] sm:w-[380px] md:w-[420px] h-[500px] md:h-[550px] rounded-lg")}
+    >
       {/* Window Header */}
       <div
-        className={cn("bg-puscom text-white px-4 py-3 flex items-center justify-between", isDraggable && !isMaximized ? "cursor-move" : "")}
-        // This is the drag handle
-        ref={draggableNodeRef}>
+        className={cn("bg-puscom text-white px-4 py-3 flex items-center justify-between", 
+          isDraggable && !isMaximized ? "cursor-move" : "")}
+        ref={draggableNodeRef}
+      >
         <div className="flex items-center gap-2">
           <Bot size={20} />
           <h3 className="font-medium text-lg">Jackie AI Assistant</h3>
         </div>
         <div className="flex items-center space-x-2">
-          <button onClick={toggleMaximize} className="focus:outline-none hover:bg-puscom-light rounded p-1 transition-colors" aria-label={isMaximized ? "Kecilkan" : "Perbesar"}>
+          <button 
+            onClick={toggleMaximize} 
+            className="focus:outline-none hover:bg-puscom-light rounded p-1 transition-colors" 
+            aria-label={isMaximized ? "Kecilkan" : "Perbesar"}
+          >
             {isMaximized ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
-          <button onClick={toggleChatVisibility} className="focus:outline-none hover:bg-puscom-light rounded p-1 transition-colors" aria-label="Tutup">
+          <button 
+            onClick={toggleChatVisibility} 
+            className="focus:outline-none hover:bg-puscom-light rounded p-1 transition-colors" 
+            aria-label="Tutup"
+          >
             <X size={16} />
           </button>
         </div>
       </div>
-
-      {/* Chat Messages */}
 
       {/* Chat Messages */}
       <div className="flex-grow overflow-y-auto p-4 space-y-3" ref={chatContainerRef}>
@@ -249,7 +344,8 @@ const JackieUI: React.FC = () => {
             fileInputRef.current.value = "";
           }
         }}
-        className={cn("p-3 border-t bg-background", isMaximized && "max-w-3xl mx-auto w-full")}>
+        className={cn("p-3 border-t bg-background", isMaximized && "max-w-3xl mx-auto w-full")}
+      >
         {/* Contoh Prompt Komputer - Dropdown */}
         <div className="mb-3">
           <label htmlFor="prompt-dropdown" className="block text-xs font-medium mb-1 text-muted-foreground">
@@ -263,7 +359,8 @@ const JackieUI: React.FC = () => {
               if (e.target.value) {
                 handleInputChange({ target: { value: e.target.value } } as any);
               }
-            }}>
+            }}
+          >
             <option value="" disabled>
               Pilih contoh prompt...
             </option>
@@ -305,7 +402,11 @@ const JackieUI: React.FC = () => {
               </div>
               <input id="file-upload" type="file" className="hidden" multiple onChange={handleFileChange} ref={fileInputRef} />
             </label>
-            <Button type="submit" disabled={(!input.trim() && !files) || false} className="bg-puscom hover:bg-puscom-light text-white h-8 w-8 rounded-full p-0">
+            <Button 
+              type="submit" 
+              disabled={(!input.trim() && !files) || false} 
+              className="bg-puscom hover:bg-puscom-light text-white h-8 w-8 rounded-full p-0"
+            >
               <Send size={16} />
               <span className="sr-only">Kirim</span>
             </Button>
@@ -317,17 +418,45 @@ const JackieUI: React.FC = () => {
   );
 
   return (
-    <div className={cn("fixed z-50", isMaximized ? "inset-0" : "bottom-4 right-4")}>
-      {isMaximized ? (
-        <div className="w-full h-full flex items-center justify-center">
-          <div className={cn("w-full h-full lg:w-3/4 lg:h-5/6 xl:w-2/3", isMaximized ? "max-w-screen-2xl" : "")}>{chatWindow}</div>
-        </div>
-      ) : (
-        <Draggable handle=".cursor-move" nodeRef={draggableNodeRef} bounds="parent" disabled={!isDraggable || isMaximized}>
-          <div>{chatWindow}</div>
-        </Draggable>
-      )}
-    </div>
+    <>
+      {chatButton}
+      
+      <AnimatePresence mode="wait">
+        {isVisible && (
+          <div className={cn("fixed z-50", isMaximized ? "inset-0" : "bottom-4 right-4")}>
+            {isMaximized ? (
+              <motion.div 
+                className="w-full h-full flex items-center justify-center"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={maximizedVariants}
+              >
+                <div className={cn("w-full h-full lg:w-3/4 lg:h-5/6 xl:w-2/3", isMaximized ? "max-w-screen-2xl" : "")}>
+                  {chatWindow}
+                </div>
+              </motion.div>
+            ) : (
+              <Draggable 
+                handle=".cursor-move" 
+                nodeRef={draggableNodeRef} 
+                bounds="parent" 
+                disabled={!isDraggable || isMaximized}
+              >
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={chatWindowVariants}
+                >
+                  {chatWindow}
+                </motion.div>
+              </Draggable>
+            )}
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
