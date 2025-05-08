@@ -57,7 +57,7 @@ const FeaturesSection = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Layanan <span className="text-blue-600">Kami</span>
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg">
             Jelajahi rangkaian produk dan layanan lengkap kami yang dirancang untuk memenuhi semua kebutuhan teknologi Anda.
           </p>
         </div>

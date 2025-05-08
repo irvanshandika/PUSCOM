@@ -21,6 +21,10 @@ function DashboardServicePage() {
         if (userSnap.exists()) {
           const userData = userSnap.data();
           setIsAdmin(userData.roles === "admin");
+        }
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setIsAdmin(userData.roles === "teknisi");
         } else {
           setIsAdmin(false);
         }
