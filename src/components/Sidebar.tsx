@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
 import { Sidebar, SidebarBody, SidebarLink, DropdownTitle } from "@/src/components/ui/sidebar";
@@ -7,15 +5,22 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
 import Image from "next/image";
-import { app } from "@/src/config/FirebaseConfig";
+import { app, db } from "@/src/config/FirebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { LayoutGrid, Users, Package, Computer, Phone, ChevronDown, Settings, CreditCard, FileText, Globe, Link2, User, ChevronsUpDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/src/components/ui/dropdown-menu";
 import { Menu } from "@headlessui/react";
+import { doc, getDoc } from 'firebase/firestore';
+
+interface UserData {
+  roles: "admin" | "user" | "teknisi";
+  displayName: string;
+  email: string;
+  photoURL?: string;
+}
 
 export default function SideBar({ children }: { children: React.ReactNode }) {
-  const links = [
+  const adminLinks = [
     {
       label: "Dashboard",
       href: "/dashboard",
@@ -42,18 +47,51 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
       icon: <Phone className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
   ];
+
+  const teknisiLinks = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: <LayoutGrid className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+    {
+      label: "Servis",
+      href: "/dashboard/services",
+      icon: <Computer className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />,
+    },
+  ];
+
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [activeLinks, setActiveLinks] = useState<typeof adminLinks>([]);
   const auth = getAuth();
   const router = useRouter();
 
   useEffect(() => {
     const authInstance = getAuth(app);
-    const unsubscribe = authInstance.onAuthStateChanged((user) => {
+    const unsubscribe = authInstance.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
+        // Fetch user role from Firestore
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as UserData;
+          setUserData(userData);
+          
+          // Set active links based on user role
+          if (userData.roles === 'admin') {
+            setActiveLinks(adminLinks);
+          } else if (userData.roles === 'teknisi') {
+            setActiveLinks(teknisiLinks);
+          } else {
+            setActiveLinks([]); // No links for regular users
+          }
+        }
       } else {
         setUser(null);
+        setUserData(null);
+        setActiveLinks([]);
       }
     });
     return () => unsubscribe();
@@ -67,7 +105,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col flex-1">
               {open ? <Logo /> : <LogoIcon />}
               <div className="mt-8 flex flex-col gap-2">
-                {links.map((link, idx) => (
+                {activeLinks.map((link, idx) => (
                   <SidebarLink key={idx} link={link} />
                 ))}
               </div>
@@ -78,7 +116,10 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
                   <Menu as="div" className="relative w-full inline-flex">
                     <Menu.Button className="w-full inline-flex shrink-0 items-center gap-x-2 p-2 text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700">
                       <Image className="shrink-0 size-5 rounded-full" src={user.photoURL} alt={user.displayName} width={20} height={20} />
-                      {user.displayName}
+                      <span className="truncate">{user.displayName}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        ({userData?.roles || 'user'})
+                      </span>
                       <ChevronsUpDown className="shrink-0 size-3.5 ms-auto" />
                     </Menu.Button>
 
@@ -109,7 +150,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
                                 await signOut(auth);
                                 router.push("/auth/login");
                               }}
-                              className={`flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 ${active ? "bg-gray-100 dark:bg-neutral-800" : ""} disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300`}>
+                              className={`flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 ${active ? "bg-gray-100 dark:bg-neutral-800" : ""} disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300 cursor-pointer`}>
                               Sign out
                             </a>
                           )}
@@ -122,7 +163,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
                 <>
                   <SidebarLink
                     link={{
-                      label: `${user && user.displayName}`,
+                      label: "Guest",
                       href: "#",
                       icon: <Users className="h-7 w-7 flex-shrink-0 rounded-full" />,
                     }}

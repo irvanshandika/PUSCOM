@@ -9,7 +9,6 @@ import TotalProducts from "@/src/servercomponents/dashboard/dashboard/TotalProdu
 import TotalUsers from "@/src/servercomponents/dashboard/dashboard/TotalUsers";
 import HistoriesActivitie from "@/src/servercomponents/dashboard/dashboard/HistoriesActivitie";
 
-
 function DashboardPage() {
   const [user, loading, error] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -25,6 +24,10 @@ function DashboardPage() {
         if (userSnap.exists()) {
           const userData = userSnap.data();
           setIsAdmin(userData.roles === "admin");
+        }
+        if (userSnap.exists()) {
+          const userData = userSnap.data();
+          setIsAdmin(userData.roles === "teknisi");
         } else {
           setIsAdmin(false);
         }
