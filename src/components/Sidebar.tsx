@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
-import { Sidebar, SidebarBody, SidebarLink, DropdownTitle } from "@/src/components/ui/sidebar";
+import { Sidebar, SidebarBody, SidebarLink } from "@/src/components/ui/sidebar";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/src/lib/utils";
@@ -8,7 +9,7 @@ import Image from "next/image";
 import { app, db } from "@/src/config/FirebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { LayoutGrid, Users, Package, Computer, Phone, ChevronDown, Settings, CreditCard, FileText, Globe, Link2, User, ChevronsUpDown } from "lucide-react";
+import { LayoutGrid, Users, Package, Computer, Phone, ChevronsUpDown } from "lucide-react";
 import { Menu } from "@headlessui/react";
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -137,7 +138,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
                         <Menu.Item>
                           {({ active }) => (
                             <a
-                              href="#"
+                              href="/settings/profile"
                               className={`flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 ${active ? "bg-gray-100 dark:bg-neutral-800" : ""} disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-300`}>
                               Settings
                             </a>
