@@ -6,29 +6,40 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/navigation";
 
+type AllowedRoles = "admin" | "teknisi";
+
 function DashboardServicePage() {
   const [user, loading, error] = useAuthState(auth);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<string>("");
   const [checkingRole, setCheckingRole] = useState(true);
   const router = useRouter();
+
+  const allowedRoles: AllowedRoles[] = ["admin", "teknisi"];
 
   useEffect(() => {
     const checkUserRole = async () => {
       if (user) {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
 
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          setIsAdmin(userData.roles === "admin");
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setUserRole(userData.roles);
+            
+            // Jika role tidak termasuk dalam allowedRoles, redirect ke forbidden
+            if (!allowedRoles.includes(userData.roles as AllowedRoles)) {
+              router.push("/forbidden");
+            }
+          } else {
+            router.push("/forbidden");
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          router.push("/forbidden");
+        } finally {
+          setCheckingRole(false);
         }
-        if (userSnap.exists()) {
-          const userData = userSnap.data();
-          setIsAdmin(userData.roles === "teknisi");
-        } else {
-          setIsAdmin(false);
-        }
-        setCheckingRole(false);
       }
     };
 
@@ -51,7 +62,8 @@ function DashboardServicePage() {
     return <div>Error: {error.message}</div>;
   }
 
-  if (!isAdmin) {
+  // Cek apakah role user termasuk dalam allowedRoles
+  if (!allowedRoles.includes(userRole as AllowedRoles)) {
     router.push("/forbidden");
     return null;
   }
