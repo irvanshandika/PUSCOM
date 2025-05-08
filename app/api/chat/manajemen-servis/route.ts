@@ -118,7 +118,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: google("gemini-2.5-flash-preview-04-17"),
     messages: modifiedMessages,
-    temperature: 0.1, // Seimbang antara kreativitas dan konsistensi
+    temperature: 1, // Seimbang antara kreativitas dan konsistensi
     topP: 0.9, // Fokus pada respons yang paling relevan
     maxTokens: 65536, // Batasi panjang respons
   });
