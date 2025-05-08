@@ -70,10 +70,14 @@ const JackieUI: React.FC = () => {
     }
   };
 
-  // Apply markdown formatting to the message content
+  // Apply markdown formatting to the message content with added table support
   const applyMarkdownFormatting = (text: string) => {
+    // Match and process table pattern
+    // Handle table pattern first to avoid conflicts with other patterns
+    const processedText = processTablesInMarkdown(text);
+    
     // Convert bold (**text**)
-    let formattedText = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    let formattedText = processedText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
     // Convert italic (*text*)
     formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>");
     // Convert code (`text`)
@@ -91,6 +95,82 @@ const JackieUI: React.FC = () => {
     formattedText = formattedText.replace(/^\d+\. (.*$)/gim, "<ol><li>$1</li></ol>");
 
     return formattedText;
+  };
+
+  // Process tables in markdown format and convert to HTML tables
+  const processTablesInMarkdown = (text: string) => {
+    // Split the text by lines
+    const lines = text.split('\n');
+    const processedLines = [];
+    let inTable = false;
+    let tableContent = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      
+      // Check if this line contains a pipe character, indicating it might be a table row
+      if (line.includes('|') && (line.trim().startsWith('|') || line.trim().endsWith('|'))) {
+        // If we're not already in a table, start a new one
+        if (!inTable) {
+          inTable = true;
+          tableContent = '<div class="overflow-auto w-full my-2"><table class="min-w-full border-collapse border border-slate-300 bg-slate-800 text-white">\n';
+          
+          // Check if the next line is a separator (---) line
+          const isHeaderRow = i + 1 < lines.length && 
+                              lines[i + 1].includes('|') && 
+                              lines[i + 1].includes('-');
+          
+          // Process header row
+          if (isHeaderRow) {
+            tableContent += '<thead class="bg-slate-700">\n<tr>\n';
+            
+            // Split the line by pipes and remove empty elements
+            const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+            
+            // Add table headers
+            for (const cell of cells) {
+              tableContent += `<th class="border border-slate-600 px-4 py-2 text-center">${cell}</th>\n`;
+            }
+            
+            tableContent += '</tr>\n</thead>\n<tbody>\n';
+            i++; // Skip the separator line
+          } else {
+            // If there's no separator line, just start the body
+            tableContent += '<tbody>\n';
+          }
+        } else {
+          // We're already in a table, process this row
+          tableContent += '<tr>\n';
+          
+          // Split the line by pipes and remove empty elements
+          const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell !== '');
+          
+          // Add table cells
+          for (const cell of cells) {
+            tableContent += `<td class="border border-slate-600 px-4 py-2">${cell}</td>\n`;
+          }
+          
+          tableContent += '</tr>\n';
+        }
+      } else if (inTable) {
+        // This line is not part of a table but we were in a table before
+        inTable = false;
+        tableContent += '</tbody>\n</table></div>';
+        processedLines.push(tableContent);
+        processedLines.push(line); // Add the current non-table line
+      } else {
+        // Not in a table and not a table line
+        processedLines.push(line);
+      }
+    }
+    
+    // If we ended the text while still in a table, close it
+    if (inTable) {
+      tableContent += '</tbody>\n</table></div>';
+      processedLines.push(tableContent);
+    }
+    
+    return processedLines.join('\n');
   };
 
   // Animation variants for the chat button
@@ -248,7 +328,7 @@ const JackieUI: React.FC = () => {
                   <span className="font-medium text-sm">{message.role === "user" ? user?.displayName || "Anda" : "Jackie AI"}</span>
                 </div>
                 {/* Apply markdown formatting to assistant messages */}
-                <p className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.role === "assistant" ? applyMarkdownFormatting(message.content) : message.content }} />
+                <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.role === "assistant" ? applyMarkdownFormatting(message.content) : message.content }} />
 
                 {/* Display attachments */}
                 {message?.experimental_attachments?.map((attachment, attachIndex) => {
@@ -374,6 +454,8 @@ const JackieUI: React.FC = () => {
             <option value="Cara cek kesehatan RAM">Cara cek kesehatan RAM</option>
             <option value="Solusi komputer overheat">Solusi komputer overheat</option>
             <option value="Cara backup data penting">Cara backup data penting</option>
+            <option value="Tampilkan perbandingan laptop gaming dalam bentuk tabel">Tampilkan perbandingan laptop gaming dalam bentuk tabel</option>
+            <option value="Tabel harga spare part komputer terbaru">Tabel harga spare part komputer terbaru</option>
           </select>
         </div>
 
