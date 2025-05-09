@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { X, Maximize2, Minimize2, Send, Paperclip, Bot, User, RefreshCw, Download } from "lucide-react";
+import { X, Maximize2, Minimize2, Send, Paperclip, Bot, User, RefreshCw } from "lucide-react";
 import Draggable from "react-draggable";
 import { useChat } from "@ai-sdk/react";
 import { cn } from "@/src/lib/utils";
@@ -174,7 +174,7 @@ const RaniAIServiceAssistant: React.FC = () => {
           const tableId = `table-${Date.now()}-${tableCount}`;
 
           // Start table container with table ID for reference
-            tableContent = `<div class="overflow-auto w-full my-2 relative" id="${tableId}-container">
+          tableContent = `<div class="overflow-auto w-full my-2 relative" id="${tableId}-container">
             <div class="-mb-6 flex justify-end">
               <button 
               class="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-md flex items-center gap-1 text-xs"
