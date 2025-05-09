@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { X, Maximize2, Minimize2, Send, Paperclip, Bot, User, RefreshCw } from "lucide-react";
+import { X, Maximize2, Minimize2, Send, Paperclip, Bot, User, RefreshCw, Download } from "lucide-react";
 import Draggable from "react-draggable";
 import { useChat } from "@ai-sdk/react";
 import { cn } from "@/src/lib/utils";
@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { getAuth } from "firebase/auth";
 import { app } from "@/src/config/FirebaseConfig";
 import { motion, AnimatePresence } from "framer-motion";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 const RaniAIServiceAssistant: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false); // Changed to false for initial state
@@ -42,6 +44,50 @@ const RaniAIServiceAssistant: React.FC = () => {
       serviceData: true,
     },
   });
+
+  const tableToExcel = (tableHTML: string, fileName: string) => {
+    try {
+      // Parse the HTML table
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(tableHTML, "text/html");
+      const table = doc.querySelector("table");
+
+      if (!table) {
+        console.error("No table found in the provided HTML");
+        return;
+      }
+
+      // Create workbook and worksheet
+      const wb = XLSX.utils.book_new();
+
+      // Extract data from HTML table
+      const rows = Array.from(table.querySelectorAll("tr"));
+      const data = rows.map((row) => Array.from(row.querySelectorAll("th, td")).map((cell) => cell.textContent?.trim() || ""));
+
+      // Convert data to worksheet
+      const ws = XLSX.utils.aoa_to_sheet(data);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, "Table Data");
+
+      // Generate Excel file and trigger download
+      const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      saveAs(blob, `${fileName}.xlsx`);
+    } catch (error) {
+      console.error("Error converting table to Excel:", error);
+    }
+  };
+
+  useEffect(() => {
+    // Add tableToExcel function to window object for onclick handlers
+    (window as any).tableToExcel = tableToExcel;
+
+    return () => {
+      // Clean up when component unmounts
+      delete (window as any).tableToExcel;
+    };
+  }, []);
 
   useEffect(() => {
     const authInstance = getAuth(app);
@@ -114,6 +160,7 @@ const RaniAIServiceAssistant: React.FC = () => {
     const processedLines = [];
     let inTable = false;
     let tableContent = "";
+    let tableCount = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -123,7 +170,24 @@ const RaniAIServiceAssistant: React.FC = () => {
         // If we're not already in a table, start a new one
         if (!inTable) {
           inTable = true;
-          tableContent = '<div class="overflow-auto w-full my-2"><table class="min-w-full border-collapse border border-slate-300 bg-slate-800 text-white">\n';
+          tableCount++;
+          const tableId = `table-${Date.now()}-${tableCount}`;
+
+          // Start table container with table ID for reference
+            tableContent = `<div class="overflow-auto w-full my-2 relative" id="${tableId}-container">
+            <div class="-mb-6 flex justify-end">
+              <button 
+              class="bg-blue-500 hover:bg-blue-700 text-white px-2 py-1 rounded-md flex items-center gap-1 text-xs"
+              onclick="(function(){
+              const tableContainer = document.getElementById('${tableId}-container');
+              const tableHTML = tableContainer.querySelector('table').outerHTML;
+              window.tableToExcel(tableHTML, 'table-export-${tableCount}');
+              })()">
+              <span>Download Excel</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+              </button>
+            </div>
+            <table id="${tableId}" class="min-w-full border-collapse border border-slate-300 bg-slate-800 text-white">\n`;
 
           // Check if the next line is a separator (---) line
           const isHeaderRow = i + 1 < lines.length && lines[i + 1].includes("|") && lines[i + 1].includes("-");
@@ -444,6 +508,9 @@ const RaniAIServiceAssistant: React.FC = () => {
             <option value="Cara backup data penting">Cara backup data penting</option>
             <option value="Tampilkan perbandingan laptop gaming dalam bentuk tabel">Tampilkan perbandingan laptop gaming dalam bentuk tabel</option>
             <option value="Tabel harga spare part komputer terbaru">Tabel harga spare part komputer terbaru</option>
+            <option value="Tampilkan perbandingan laptop gaming dalam bentuk tabel">Tampilkan perbandingan laptop gaming dalam bentuk tabel</option>
+            <option value="Tabel harga spare part komputer terbaru">Tabel harga spare part komputer terbaru</option>
+            <option value="Buatkan tabel kerusakan komputer dan solusinya">Buatkan tabel kerusakan komputer dan solusinya</option>
           </select>
         </div>
 
