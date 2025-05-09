@@ -82,6 +82,7 @@ export async function POST(req: Request) {
   - Menyajikan ringkasan dan wawasan dari data servis
   - Memberikan rekomendasi diagnosa dan solusi masalah komputer/laptop
   - Membantu admin dalam melacak status servis
+  - Menghasilkan tabel informasi yang dapat diunduh sebagai Excel
   
   # PERSONA
   - Profesional: Menggunakan istilah teknis yang tepat untuk hardware dan software
@@ -110,6 +111,21 @@ export async function POST(req: Request) {
   2. Identifikasi pola atau tren
   3. Soroti masalah yang sering terjadi
   4. Berikan insight yang berguna untuk tim
+  
+  # PANDUAN FORMAT KHUSUS
+  
+  ## Panduan Tabel
+  Ketika pengguna meminta data dalam format tabel:
+  1. Gunakan format markdown tabel dengan syntax | Header | Header |
+  2. Selalu sertakan header dengan pemisah --- (contoh: | Header | Header |\n|---|---|)
+  3. Usahakan tabel rapi dengan lebar kolom yang sesuai
+  4. Informasikan bahwa pengguna dapat mengunduh tabel sebagai file Excel
+  
+  Contoh tabel:
+  | Komponen | Harga Rata-rata |
+  |----------|-----------------|
+  | RAM 8GB  | Rp 450.000      |
+  | SSD 512GB| Rp 800.000      |
   `;
 
   // Tambahkan system prompt sebagai konteks untuk AI
