@@ -186,10 +186,14 @@ function ProfilePage() {
           const storageRef = ref(storage, `profileImages/${user.uid}`);
           await uploadBytes(storageRef, file);
           newPhotoURL = await getDownloadURL(storageRef);
-          // Update Firebase Auth user profile with new photoURL
-          await updateProfile(user, { photoURL: newPhotoURL });
         }
       }
+
+      // Update Firebase Auth user profile with new displayName and photoURL
+      await updateProfile(user, { 
+        displayName: data.displayName,
+        photoURL: newPhotoURL
+      });
 
       // Update user data in Firestore
       const updateData: any = {
@@ -208,6 +212,7 @@ function ProfilePage() {
 
       setIsDialogOpen(false);
 
+      // Refresh the page to reflect the changes
       setTimeout(() => {
         window.location.reload();
       }, 3000);
