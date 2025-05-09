@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { LayoutGrid, Users, Package, Computer, Phone, ChevronsUpDown } from "lucide-react";
 import { Menu } from "@headlessui/react";
 import { doc, getDoc } from 'firebase/firestore';
+import AIChatDashboard from "./AIChatDashboard";
 
 interface UserData {
   roles: "admin" | "user" | "teknisi";
@@ -176,6 +177,7 @@ export default function SideBar({ children }: { children: React.ReactNode }) {
         </Sidebar>
         <main className="flex-1 overflow-y-auto">
           <div className="p-2 md:p-10 rounded-tl-2xl flex flex-col gap-2 w-full min-h-full dark:bg-neutral-950">{children}</div>
+          <AIChatDashboard />
         </main>
       </div>
     </div>
