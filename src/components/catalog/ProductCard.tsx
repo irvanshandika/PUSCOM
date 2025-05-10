@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardFooter } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import { Eye, ShoppingCart } from "lucide-react";
+import { Eye } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
