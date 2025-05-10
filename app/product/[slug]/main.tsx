@@ -10,7 +10,6 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Button } from "@/src/components/ui/button";
 import { Copy, Check, ChevronLeft, Share } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { Skeleton } from "@/src/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import { Input } from "@/src/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -150,6 +149,32 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
+  };
+
+  const applyMarkdownFormatting = (text: string) => {
+    // Match and process table pattern
+    // Handle table pattern first to avoid conflicts with other patterns
+    const processedText = text;
+
+    // Convert bold (**text**)
+    let formattedText = processedText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Convert italic (*text*)
+    formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    // Convert code (`text`)
+    formattedText = formattedText.replace(/`([^`]*)`/g, "<code>$1</code>");
+    // Convert headings (#, ##, ###)
+    formattedText = formattedText.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+    formattedText = formattedText.replace(/^## (.*$)/gim, "<h2>$1</h2>");
+    formattedText = formattedText.replace(/^# (.*$)/gim, "<h1>$1</h1>");
+    // Convert links [text](url)
+    formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+    // Convert lists (- or *)
+    formattedText = formattedText.replace(/^\* (.*$)/gim, "<ul><li>$1</li></ul>");
+    formattedText = formattedText.replace(/^\- (.*$)/gim, "<ul><li>$1</li></ul>");
+    // Convert numbered lists (1. 2. etc)
+    formattedText = formattedText.replace(/^\d+\. (.*$)/gim, "<ol><li>$1</li></ol>");
+
+    return formattedText;
   };
 
   // Fungsi copy link
@@ -299,7 +324,7 @@ export default function ProductDetailMain({ slug }: ProductDetailMainProps) {
             <div>
               <h3 className="text-lg font-semibold mb-2">Deskripsi Produk</h3>
               <div className="prose max-w-none">
-                <p className="text-muted-foreground">{product.description}</p>
+                <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: applyMarkdownFormatting(product.description) }} />
               </div>
             </div>
 

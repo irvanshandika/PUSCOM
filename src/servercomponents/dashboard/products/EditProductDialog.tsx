@@ -1,15 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
-import { Textarea } from "@/src/components/ui/textarea";
 import { Button } from "@/src/components/ui/button";
-import { X, Plus, ImagePlus } from "lucide-react";
+import { X, Plus, ImagePlus, Bold, Italic, List, ListOrdered, Heading2 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
+
+// TipTap imports
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Link from '@tiptap/extension-link';
 
 const CATEGORIES = ["Komputer", "Laptop", "Spare Part"];
 const E_COMMERCE = ["Shopee", "Blibli", "Tokopedia", "Lazada"];
@@ -37,6 +41,85 @@ type EditProductDialogProps = {
   onClose: () => void;
   onSubmit: (product: Product) => void;
   product: Product | null;
+};
+
+// TipTap Rich Text Editor component
+const RichTextEditor = ({ value, onChange }: { value: string, onChange: (value: string) => void }) => {
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Tulis deskripsi produk...',
+      }),
+      Link.configure({
+        openOnClick: false,
+      }),
+    ],
+    content: value,
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+  });
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="rich-text-editor border rounded-md overflow-hidden dark:border-neutral-700">
+      <div className="bg-neutral-50 border-b p-2 flex gap-2 dark:bg-neutral-800 dark:border-neutral-700">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={`h-8 w-8 ${editor.isActive('bold') ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+        >
+          <Bold size={16} />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={`h-8 w-8 ${editor.isActive('italic') ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+        >
+          <Italic size={16} />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={`h-8 w-8 ${editor.isActive('heading', { level: 2 }) ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        >
+          <Heading2 size={16} />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={`h-8 w-8 ${editor.isActive('bulletList') ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+        >
+          <List size={16} />
+        </Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={`h-8 w-8 ${editor.isActive('orderedList') ? 'bg-neutral-200 dark:bg-neutral-700' : ''}`}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        >
+          <ListOrdered size={16} />
+        </Button>
+      </div>
+      <EditorContent 
+        editor={editor} 
+        className="p-3 min-h-[150px] focus:outline-none prose prose-sm max-w-none dark:prose-invert dark:bg-neutral-800"
+      />
+    </div>
+  );
 };
 
 export default function EditProductDialog({ open, onClose, onSubmit, product }: EditProductDialogProps) {
@@ -159,10 +242,19 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
     const src = typeof image === "string" ? image : URL.createObjectURL(image);
 
     return (
-      <div key={index} className="relative">
-        <Image src={src} alt={`Preview ${index}`} className="w-full h-20 object-cover rounded" width={0} height={0} />
-        <button onClick={() => removeImage(index)} className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-full m-1">
-          <X size={12} />
+      <div key={index} className="relative group overflow-hidden rounded-lg">
+        <Image 
+          src={src} 
+          alt={`Preview ${index}`} 
+          className="w-full h-24 object-cover transition-all group-hover:opacity-80" 
+          width={120} 
+          height={96} 
+        />
+        <button 
+          onClick={() => removeImage(index)} 
+          className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+        >
+          <X size={14} />
         </button>
       </div>
     );
@@ -170,25 +262,35 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 dark:scrollbar-track-neutral-800 dark:scrollbar-thumb-neutral-600">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 dark:scrollbar-track-neutral-800 dark:scrollbar-thumb-neutral-600">
         <DialogHeader>
-          <DialogTitle className="text-2xl dark:text-white">Edit Produk</DialogTitle>
+          <DialogTitle className="text-xl font-medium dark:text-white">Edit Produk</DialogTitle>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+        <div className="space-y-6 py-4">
+          {/* Basic Info Section */}
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <label className="block mb-2 dark:text-neutral-200">Nama Produk</label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Masukkan nama produk" className="dark:bg-neutral-800 dark:text-white" />
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Nama Produk <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="Masukkan nama produk" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
             </div>
 
             <div>
-              <label className="block mb-2 dark:text-neutral-200">Kategori</label>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Kategori <span className="text-red-500">*</span>
+              </label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="dark:bg-neutral-800 dark:text-white">
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                   <SelectValue placeholder="Pilih Kategori" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-neutral-900">
                   {CATEGORIES.map((cat) => (
                     <SelectItem key={cat} value={cat}>
                       {cat}
@@ -197,25 +299,45 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-2 dark:text-neutral-200">Harga</label>
-                <Input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Harga" className="dark:bg-neutral-800 dark:text-white" />
-              </div>
-              <div>
-                <label className="block mb-2 dark:text-neutral-200">Stok</label>
-                <Input type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="Stok" className="dark:bg-neutral-800 dark:text-white" />
-              </div>
-            </div>
-
+          {/* Price & Stock Section */}
+          <div className="grid md:grid-cols-3 gap-6">
             <div>
-              <label className="block mb-2 dark:text-neutral-200">Kondisi</label>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Harga <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                type="number" 
+                value={price} 
+                onChange={(e) => setPrice(e.target.value)} 
+                placeholder="Harga" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Stok <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                type="number" 
+                value={stock} 
+                onChange={(e) => setStock(e.target.value)} 
+                placeholder="Stok" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Kondisi <span className="text-red-500">*</span>
+              </label>
               <Select value={condition} onValueChange={setCondition}>
-                <SelectTrigger className="dark:bg-neutral-800 dark:text-white">
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                   <SelectValue placeholder="Pilih Kondisi" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="dark:bg-neutral-900">
                   {CONDITIONS.map((cond) => (
                     <SelectItem key={cond} value={cond}>
                       {cond}
@@ -226,55 +348,74 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block mb-2 dark:text-neutral-200">Deskripsi</label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Deskripsi produk" className="h-32 dark:bg-neutral-800 dark:text-white" />
+          {/* Description Section */}
+          <div>
+            <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+              Deskripsi
+            </label>
+            <RichTextEditor value={description} onChange={setDescription} />
+          </div>
+
+          {/* Images Section */}
+          <div>
+            <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+              Gambar Produk
+            </label>
+            
+            <div
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-lg p-6 text-center cursor-pointer 
+                ${isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-neutral-300 dark:border-neutral-700"}
+                hover:border-blue-400 dark:hover:border-blue-600 transition-colors
+                dark:bg-neutral-800
+              `}>
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p className="text-blue-500 dark:text-blue-400">Lepaskan gambar di sini</p>
+              ) : (
+                <div className="flex flex-col items-center py-4">
+                  <ImagePlus size={36} className="text-neutral-400 mb-3" />
+                  <p className="text-neutral-600 dark:text-neutral-400">
+                    Seret & lepas gambar atau <span className="text-blue-500 font-medium">pilih file</span>
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">Maks. 5 gambar (PNG, JPG, WEBP)</p>
+                </div>
+              )}
             </div>
 
-            <div>
-              <label className="block mb-2 dark:text-neutral-200">Upload Gambar</label>
-              <div
-                {...getRootProps()}
-                className={`
-                  border-2 border-dashed p-6 text-center cursor-pointer 
-                  ${isDragActive ? "border-green-500" : "border-gray-300 dark:border-neutral-700"}
-                  hover:border-primary transition-colors
-                  dark:bg-neutral-800
-                `}>
-                <input {...getInputProps()} />
-                {isDragActive ? (
-                  <p className="text-green-500">Lepaskan file di sini</p>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <ImagePlus size={48} className="text-gray-400 mb-2" />
-                    <p className="text-gray-500 dark:text-neutral-400">
-                      Seret & lepas gambar atau
-                      <span className="text-primary ml-1">Pilih File</span>
-                    </p>
-                    <p className="text-xs text-gray-400 mt-1">Maks. 5 gambar (PNG, JPG, WEBP)</p>
-                  </div>
-                )}
+            {images.length > 0 && (
+              <div className="grid grid-cols-5 gap-3 mt-4">
+                {images.map(renderImagePreview)}
               </div>
+            )}
+          </div>
 
-              <div className="grid grid-cols-4 gap-2 mt-4">{images.map(renderImagePreview)}</div>
+          {/* E-Commerce Links Section */}
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                Link E-Commerce
+              </label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addEcommerceLink} 
+                className="h-8 text-xs flex items-center gap-1 dark:border-neutral-700 dark:text-white"
+              >
+                <Plus size={14} /> Tambah Link
+              </Button>
             </div>
 
-            <div>
-              <label className="mb-2 dark:text-neutral-200 flex justify-between items-center">
-                <span>E-Commerce Links</span>
-                <Button type="button" variant="ghost" size="sm" onClick={addEcommerceLink} className="flex items-center gap-2">
-                  <Plus size={16} /> Tambah Link
-                </Button>
-              </label>
-
+            <div className="space-y-3">
               {ecommerceLinks.map((link, index) => (
-                <div key={index} className="flex gap-2 mb-2">
+                <div key={index} className="flex gap-3">
                   <Select value={link.platform} onValueChange={(platform) => updateEcommercePlatform(index, platform)}>
-                    <SelectTrigger className="w-1/3 dark:bg-neutral-800 dark:text-white">
+                    <SelectTrigger className="w-1/3 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
                       <SelectValue placeholder="Platform" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="dark:bg-neutral-900">
                       {E_COMMERCE.map((platform) => (
                         <SelectItem key={platform} value={platform}>
                           {platform}
@@ -283,10 +424,21 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
                     </SelectContent>
                   </Select>
 
-                  <Input value={link.url} onChange={(e) => updateEcommerceUrl(index, e.target.value)} placeholder="URL E-Commerce" className="flex-grow dark:bg-neutral-800 dark:text-white" />
+                  <Input 
+                    value={link.url} 
+                    onChange={(e) => updateEcommerceUrl(index, e.target.value)} 
+                    placeholder="URL E-Commerce" 
+                    className="flex-grow dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+                  />
 
                   {ecommerceLinks.length > 1 && (
-                    <Button type="button" variant="destructive" size="icon" onClick={() => removeEcommerceLink(index)}>
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeEcommerceLink(index)}
+                      className="h-10 w-10 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
                       <X size={16} />
                     </Button>
                   )}
@@ -296,12 +448,20 @@ export default function EditProductDialog({ open, onClose, onSubmit, product }: 
           </div>
         </div>
 
-        <DialogFooter className="mt-6">
-          <div className="flex justify-between w-full">
-            <Button variant="outline" onClick={resetForm} className="dark:text-white dark:border-neutral-700">
+        <DialogFooter className="mt-4 pt-4 border-t dark:border-neutral-800">
+          <div className="flex gap-3 justify-end w-full">
+            <Button 
+              variant="outline" 
+              onClick={resetForm} 
+              className="dark:bg-transparent dark:text-white dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
               Batal
             </Button>
-            <Button onClick={handleSubmit} disabled={!name || !category || !price || !stock} variant="default">
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!name || !category || !price || !stock} 
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+            >
               Perbarui Produk
             </Button>
           </div>
