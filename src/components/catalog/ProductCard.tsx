@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardFooter } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -32,7 +32,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const applyMarkdownFormatting = (text: string) => {
     // Match and process table pattern
-    // Handle table pattern first to avoid conflicts with other patterns
     const processedText = text;
 
     // Convert bold (**text**)
@@ -57,31 +56,59 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:shadow-md">
-      <div className="aspect-square overflow-hidden relative">
-        <Image src={product.images[0] || "https://placehold.co/400x400/png"} alt={product.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" width={0} height={0} />
+    <Card className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:translate-y-[-5px] hover:shadow-lg border-0 shadow-sm bg-white dark:bg-gray-800 rounded-xl">
+      <div className="aspect-square overflow-hidden relative rounded-t-xl">
+        <Image 
+          src={product.images[0] || "https://placehold.co/400x400/png"} 
+          alt={product.name} 
+          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" 
+          width={400} 
+          height={400} 
+          priority
+        />
         <div className="absolute top-2 right-2">
-          <Badge variant={product.stock > 0 ? "default" : "destructive"}>{product.stock > 0 ? "Tersedia" : "Habis"}</Badge>
+          {product.stock <= 0 ? (
+            <Badge variant="destructive" className="rounded-full">Habis</Badge>
+          ) : product.stock < 5 ? (
+            <Badge variant="secondary" className="rounded-full">Stok Terbatas</Badge>
+          ) : null}
         </div>
         <div className="absolute top-2 left-2">
-          <Badge variant="secondary">{product.category}</Badge>
+          <Badge variant="outline" className="rounded-full bg-white/70 dark:bg-black/50 backdrop-blur-sm">
+            {product.category}
+          </Badge>
         </div>
       </div>
 
       <CardContent className="flex-grow pt-4">
-        <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
-        <p className="text-muted-foreground text-sm line-clamp-2 mt-1" dangerouslySetInnerHTML={{ __html: applyMarkdownFormatting(product.description) }}/>
-        <div className="mt-3">
-          <p className="font-bold text-lg">{formatPrice(product.price)}</p>
-          <p className="text-sm text-muted-foreground">Stok: {product.stock} tersisa</p>
+        <div className="flex items-start justify-between mb-1">
+          <h3 className="font-medium text-base line-clamp-1 text-gray-900 dark:text-gray-50">{product.name}</h3>
+        </div>
+        
+        <p 
+          className="text-muted-foreground text-xs line-clamp-2 min-h-[2rem] mt-1"
+          dangerouslySetInnerHTML={{ __html: applyMarkdownFormatting(product.description) }}
+        />
+        
+        <div className="mt-2">
+          <p className="font-semibold text-base text-gray-900 dark:text-gray-50">{formatPrice(product.price)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {product.stock > 0 
+              ? `${product.stock} tersisa` 
+              : "Stok habis"}
+          </p>
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3 pt-0 pb-4">
-        <Button className="w-full" asChild>
+      <CardFooter className="flex flex-col gap-2 pt-0 pb-4">
+        <Button 
+          className="w-full rounded-full" 
+          variant="default"
+          asChild
+        >
           <Link href={`/product/${product.slug}`}>
             <Eye className="mr-2 h-4 w-4" />
-            Lihat Produk
+            Lihat Detail
           </Link>
         </Button>
       </CardFooter>
