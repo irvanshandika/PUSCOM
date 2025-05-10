@@ -30,6 +30,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }).format(price);
   };
 
+  const applyMarkdownFormatting = (text: string) => {
+    // Match and process table pattern
+    // Handle table pattern first to avoid conflicts with other patterns
+    const processedText = text;
+
+    // Convert bold (**text**)
+    let formattedText = processedText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    // Convert italic (*text*)
+    formattedText = formattedText.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    // Convert code (`text`)
+    formattedText = formattedText.replace(/`([^`]*)`/g, "<code>$1</code>");
+    // Convert headings (#, ##, ###)
+    formattedText = formattedText.replace(/^### (.*$)/gim, "<h3>$1</h3>");
+    formattedText = formattedText.replace(/^## (.*$)/gim, "<h2>$1</h2>");
+    formattedText = formattedText.replace(/^# (.*$)/gim, "<h1>$1</h1>");
+    // Convert links [text](url)
+    formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+    // Convert lists (- or *)
+    formattedText = formattedText.replace(/^\* (.*$)/gim, "<ul><li>$1</li></ul>");
+    formattedText = formattedText.replace(/^\- (.*$)/gim, "<ul><li>$1</li></ul>");
+    // Convert numbered lists (1. 2. etc)
+    formattedText = formattedText.replace(/^\d+\. (.*$)/gim, "<ol><li>$1</li></ol>");
+
+    return formattedText;
+  };
+
   return (
     <Card className="overflow-hidden flex flex-col h-full transition-all duration-200 hover:shadow-md">
       <div className="aspect-square overflow-hidden relative">
@@ -44,7 +70,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       <CardContent className="flex-grow pt-4">
         <h3 className="font-semibold text-lg line-clamp-1">{product.name}</h3>
-        <p className="text-muted-foreground text-sm line-clamp-2 mt-1">{product.description}</p>
+        <p className="text-muted-foreground text-sm line-clamp-2 mt-1" dangerouslySetInnerHTML={{ __html: applyMarkdownFormatting(product.description) }}/>
         <div className="mt-3">
           <p className="font-bold text-lg">{formatPrice(product.price)}</p>
           <p className="text-sm text-muted-foreground">Stok: {product.stock} tersisa</p>
