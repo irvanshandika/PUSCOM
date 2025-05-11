@@ -169,219 +169,235 @@ export default function AddProductDialog({ open, onClose, onSubmit }: AddProduct
     onClose();
   };
 
+  const renderImagePreview = (file: File, index: number) => {
+    const src = URL.createObjectURL(file);
+
+    return (
+      <div key={index} className="relative group overflow-hidden rounded-lg">
+        <Image 
+          src={src} 
+          alt={`Preview ${index}`} 
+          className="w-full h-24 object-cover transition-all group-hover:opacity-80" 
+          width={120} 
+          height={96} 
+        />
+        <button 
+          onClick={() => removeImage(index)} 
+          className="absolute top-2 right-2 bg-black/60 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+          type="button"
+        >
+          <X size={14} />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 dark:scrollbar-track-neutral-800 dark:scrollbar-thumb-neutral-600">
         <DialogHeader>
-          <DialogTitle className="text-xl font-medium tracking-tight">Tambah Produk Baru</DialogTitle>
+          <DialogTitle className="text-xl font-medium dark:text-white">Tambah Produk Baru</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="details">Detail Produk</TabsTrigger>
-            <TabsTrigger value="description">Deskripsi</TabsTrigger>
-            <TabsTrigger value="media">Media & Link</TabsTrigger>
-          </TabsList>
+        <div className="space-y-6 py-4">
+          {/* Basic Info Section */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Nama Produk <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder="Masukkan nama produk" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
+            </div>
 
-          <TabsContent value="details" className="mt-0">
-            <Card className="border-none shadow-none">
-              <CardContent className="p-0 space-y-4">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Nama Produk</label>
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Kategori <span className="text-red-500">*</span>
+              </label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                  <SelectValue placeholder="Pilih Kategori" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-neutral-900">
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Price & Stock Section */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Harga <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                type="number" 
+                value={price} 
+                onChange={(e) => setPrice(e.target.value)} 
+                placeholder="Harga" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Stok <span className="text-red-500">*</span>
+              </label>
+              <Input 
+                type="number" 
+                value={stock} 
+                onChange={(e) => setStock(e.target.value)} 
+                placeholder="Stok" 
+                className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+                Kondisi <span className="text-red-500">*</span>
+              </label>
+              <Select value={condition} onValueChange={setCondition}>
+                <SelectTrigger className="dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                  <SelectValue placeholder="Pilih Kondisi" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-neutral-900">
+                  {CONDITIONS.map((cond) => (
+                    <SelectItem key={cond} value={cond}>
+                      {cond}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Description Section */}
+          <div>
+            <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+              Deskripsi
+            </label>
+            <TiptapEditor
+              content={description}
+              onChange={setDescription}
+              className="min-h-[250px] rounded-md border dark:border-neutral-700"
+            />
+          </div>
+
+          {/* Images Section */}
+          <div>
+            <label className="text-sm font-medium mb-2 block text-neutral-700 dark:text-neutral-300">
+              Gambar Produk
+            </label>
+            
+            <div
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-lg p-6 text-center cursor-pointer 
+                ${isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-neutral-300 dark:border-neutral-700"}
+                hover:border-blue-400 dark:hover:border-blue-600 transition-colors
+                dark:bg-neutral-800
+              `}>
+              <input {...getInputProps()} />
+              {isDragActive ? (
+                <p className="text-blue-500 dark:text-blue-400">Lepaskan gambar di sini</p>
+              ) : (
+                <div className="flex flex-col items-center py-4">
+                  <ImagePlus size={36} className="text-neutral-400 mb-3" />
+                  <p className="text-neutral-600 dark:text-neutral-400">
+                    Seret & lepas gambar atau <span className="text-blue-500 font-medium">pilih file</span>
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">Maks. 5 gambar (PNG, JPG, WEBP)</p>
+                </div>
+              )}
+            </div>
+
+            {images.length > 0 && (
+              <div className="grid grid-cols-5 gap-3 mt-4">
+                {images.map(renderImagePreview)}
+              </div>
+            )}
+          </div>
+
+          {/* E-Commerce Links Section */}
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                Link E-Commerce
+              </label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                onClick={addEcommerceLink} 
+                className="h-8 text-xs flex items-center gap-1 dark:border-neutral-700 dark:text-white"
+                disabled={ecommerceLinks.length >= 5}
+              >
+                <Plus size={14} /> Tambah Link
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {ecommerceLinks.map((link, index) => (
+                <div key={index} className="flex gap-3">
+                  <Select value={link.platform} onValueChange={(platform) => updateEcommercePlatform(index, platform)}>
+                    <SelectTrigger className="w-1/3 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white">
+                      <SelectValue placeholder="Platform" />
+                    </SelectTrigger>
+                    <SelectContent className="dark:bg-neutral-900">
+                      {E_COMMERCE.map((platform) => (
+                        <SelectItem key={platform} value={platform}>
+                          {platform}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
                   <Input 
-                    value={name} 
-                    onChange={(e) => setName(e.target.value)} 
-                    placeholder="Masukkan nama produk" 
-                    className="h-9 dark:bg-neutral-800" 
+                    value={link.url} 
+                    onChange={(e) => updateEcommerceUrl(index, e.target.value)} 
+                    placeholder="URL E-Commerce" 
+                    className="flex-grow dark:bg-neutral-800 dark:border-neutral-700 dark:text-white" 
                   />
-                </div>
 
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Kategori</label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-9 dark:bg-neutral-800">
-                      <SelectValue placeholder="Pilih Kategori" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium">Harga</label>
-                    <Input 
-                      type="number" 
-                      value={price} 
-                      onChange={(e) => setPrice(e.target.value)} 
-                      placeholder="Harga" 
-                      className="h-9 dark:bg-neutral-800" 
-                    />
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-sm font-medium">Stok</label>
-                    <Input 
-                      type="number" 
-                      value={stock} 
-                      onChange={(e) => setStock(e.target.value)} 
-                      placeholder="Stok" 
-                      className="h-9 dark:bg-neutral-800" 
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Kondisi</label>
-                  <Select value={condition} onValueChange={setCondition}>
-                    <SelectTrigger className="h-9 dark:bg-neutral-800">
-                      <SelectValue placeholder="Pilih Kondisi" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CONDITIONS.map((cond) => (
-                        <SelectItem key={cond} value={cond}>{cond}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="description" className="mt-0">
-            <Card className="border-none shadow-none">
-              <CardContent className="p-0">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Deskripsi Produk</label>
-                  <TiptapEditor
-                    content={description}
-                    onChange={setDescription}
-                    className="min-h-[250px] rounded-md border dark:border-neutral-700"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="media" className="mt-0">
-            <Card className="border-none shadow-none">
-              <CardContent className="p-0 space-y-6">
-                <div className="space-y-3">
-                  <label className="text-sm font-medium">Gambar Produk</label>
-                  <div
-                    {...getRootProps()}
-                    className={cn(
-                      "border-2 border-dashed rounded-lg p-4 transition-colors text-center cursor-pointer",
-                      isDragActive 
-                        ? "border-primary bg-primary/5" 
-                        : "border-neutral-200 hover:border-primary/50 dark:border-neutral-700"
-                    )}
-                  >
-                    <input {...getInputProps()} />
-                    <div className="flex flex-col items-center py-4">
-                      <ImagePlus size={32} className="text-neutral-400 mb-2" />
-                      <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                        {isDragActive ? "Lepaskan file di sini" : "Seret & lepas gambar atau klik untuk memilih"}
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">Maks. 5 gambar (PNG, JPG, WEBP)</p>
-                    </div>
-                  </div>
-
-                  {images.length > 0 && (
-                    <div className="grid grid-cols-5 gap-3 mt-3">
-                      {images.map((file, index) => (
-                        <div key={index} className="relative aspect-square rounded-md overflow-hidden group">
-                          <Image 
-                            src={URL.createObjectURL(file)} 
-                            alt={`Preview ${index}`} 
-                            className="object-cover" 
-                            fill 
-                            sizes="(max-width: 768px) 100vw, 20vw"
-                          />
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeImage(index);
-                              }} 
-                              className="bg-red-500 text-white p-1 rounded-full"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  {ecommerceLinks.length > 1 && (
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeEcommerceLink(index)}
+                      className="h-10 w-10 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <X size={16} />
+                    </Button>
                   )}
                 </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-medium">Link E-Commerce</label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addEcommerceLink}
-                      className="h-8 text-xs"
-                      disabled={ecommerceLinks.length >= 5}
-                    >
-                      <Plus size={14} className="mr-1" /> Tambah Link
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {ecommerceLinks.map((link, index) => (
-                      <div key={index} className="flex gap-2 items-center">
-                        <Select value={link.platform} onValueChange={(platform) => updateEcommercePlatform(index, platform)}>
-                          <SelectTrigger className="h-9 w-1/3 dark:bg-neutral-800">
-                            <SelectValue placeholder="Platform" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {E_COMMERCE.map((platform) => (
-                              <SelectItem key={platform} value={platform}>{platform}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                        <Input 
-                          value={link.url} 
-                          onChange={(e) => updateEcommerceUrl(index, e.target.value)} 
-                          placeholder="URL E-Commerce" 
-                          className="h-9 flex-grow dark:bg-neutral-800" 
-                        />
-
-                        {ecommerceLinks.length > 1 && (
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => removeEcommerceLink(index)}
-                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                          >
-                            <X size={14} />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        <DialogFooter className="pt-4 border-t dark:border-neutral-800">
-          <div className="flex justify-between w-full">
-            <Button variant="ghost" onClick={resetForm} className="h-9 px-4">
+        <DialogFooter className="mt-4 pt-4 border-t dark:border-neutral-800">
+          <div className="flex gap-3 justify-end w-full">
+            <Button 
+              variant="outline" 
+              onClick={resetForm} 
+              className="dark:bg-transparent dark:text-white dark:border-neutral-700 dark:hover:bg-neutral-800"
+            >
               Batal
             </Button>
             <Button 
               onClick={handleSubmit} 
-              disabled={!name || !category || !price || !stock || isSubmitting} 
-              className="h-9 px-5"
+              disabled={!name || !category || !price || !stock || isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
             >
               {isSubmitting ? (
                 <>
