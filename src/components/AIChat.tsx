@@ -28,7 +28,7 @@ const JackieUI: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   // Using useChat for chat API
-  const { messages, input, reload, error, handleInputChange, handleSubmit } = useChat({
+  const { messages, input, reload, error, isLoading, handleInputChange, handleSubmit } = useChat({
     keepLastMessageOnError: true,
     api: "/api/chat/gemini",
   });
@@ -46,7 +46,7 @@ const JackieUI: React.FC = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isLoading]);
 
   const toggleChatVisibility = () => {
     setIsVisible(!isVisible);
@@ -244,6 +244,25 @@ const JackieUI: React.FC = () => {
     }
   };
 
+  // Animation variants for thinking dots
+  const dotsVariants = {
+    animate: {
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const dotVariant = {
+    animate: {
+      y: [0, -5, 0],
+      transition: {
+        repeat: Infinity,
+        duration: 0.6
+      }
+    }
+  };
+
   // Button to open the chat
   const chatButton = (
     <AnimatePresence mode="wait">
@@ -266,6 +285,34 @@ const JackieUI: React.FC = () => {
         </motion.div>
       )}
     </AnimatePresence>
+  );
+
+  // Thinking indicator component
+  const ThinkingIndicator = () => (
+    <div className={cn("max-w-[80%] mr-auto", isMaximized ? "max-w-full sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] mx-auto" : "")}>
+      <div className="p-3 rounded-lg bg-muted text-foreground rounded-bl-none animate-pulse">
+        <div className="flex items-center gap-2 mb-1">
+          <Bot size={16} className="text-puscom" />
+          <span className="font-medium text-sm">Jackie AI</span>
+        </div>
+        <div className="flex items-center">
+          <span className="text-sm mr-2">Thinking</span>
+          <motion.div
+            className="flex space-x-1"
+            variants={dotsVariants}
+            animate="animate"
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-gray-500"
+                variants={dotVariant}
+              />
+            ))}
+          </motion.div>
+        </div>
+      </div>
+    </div>
   );
 
   const chatWindow = (
@@ -310,69 +357,74 @@ const JackieUI: React.FC = () => {
             <p className="text-muted-foreground">Asisten AI kami siap membantu Anda untuk menemukan komputer, laptop, spare part, atau servis yang sesuai dengan kebutuhan Anda.</p>
           </div>
         ) : (
-          messages.map((message, index) => (
-            <div key={index} className={cn("animate-fade-in", isMaximized ? "max-w-full sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] mx-auto" : "max-w-[80%]", message.role === "user" ? "ml-auto" : "mr-auto")}>
-              <div className={cn("p-3 rounded-lg", message.role === "user" ? "bg-blue-500 text-white rounded-br-none" : "bg-muted text-foreground rounded-bl-none")}>
-                <div className="flex items-center gap-2 mb-1">
-                  {message.role === "assistant" ? (
-                    <Bot size={16} className="text-puscom" />
-                  ) : user?.photoURL ? (
-                    <>
-                      <Image src={user.photoURL} width={16} height={16} alt={user.displayName} className="rounded-full" />
-                    </>
-                  ) : (
-                    <>
-                      <User size={16} />
-                    </>
-                  )}
-                  <span className="font-medium text-sm">{message.role === "user" ? user?.displayName || "Anda" : "Jackie AI"}</span>
-                </div>
-                {/* Apply markdown formatting to assistant messages */}
-                <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.role === "assistant" ? applyMarkdownFormatting(message.content) : message.content }} />
+          <>
+            {messages.map((message, index) => (
+              <div key={index} className={cn("animate-fade-in", isMaximized ? "max-w-full sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] mx-auto" : "max-w-[80%]", message.role === "user" ? "ml-auto" : "mr-auto")}>
+                <div className={cn("p-3 rounded-lg", message.role === "user" ? "bg-blue-500 text-white rounded-br-none" : "bg-muted text-foreground rounded-bl-none")}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {message.role === "assistant" ? (
+                      <Bot size={16} className="text-puscom" />
+                    ) : user?.photoURL ? (
+                      <>
+                        <Image src={user.photoURL} width={16} height={16} alt={user.displayName} className="rounded-full" />
+                      </>
+                    ) : (
+                      <>
+                        <User size={16} />
+                      </>
+                    )}
+                    <span className="font-medium text-sm">{message.role === "user" ? user?.displayName || "Anda" : "Jackie AI"}</span>
+                  </div>
+                  {/* Apply markdown formatting to assistant messages */}
+                  <div className="text-sm whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: message.role === "assistant" ? applyMarkdownFormatting(message.content) : message.content }} />
 
-                {/* Display attachments */}
-                {message?.experimental_attachments?.map((attachment, attachIndex) => {
-                  if (attachment.contentType?.startsWith("image/")) {
+                  {/* Display attachments */}
+                  {message?.experimental_attachments?.map((attachment, attachIndex) => {
+                    if (attachment.contentType?.startsWith("image/")) {
+                      return (
+                        <div key={`${index}-${attachIndex}`}>
+                          <Dialog>
+                            <DialogTrigger>
+                              <Image src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${attachIndex}`} className="mt-2 rounded-md" />
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{attachment.name || `Image ${attachIndex + 1}`}</DialogTitle>
+                              </DialogHeader>
+                              <Image src={attachment.url || "/placeholder.svg"} width={800} height={800} alt={attachment.name ?? `attachment-${attachIndex}`} className="rounded-md bg-auto bg-no-repeat bg-center" />
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      );
+                    }
+                    if (attachment.contentType?.startsWith("application/pdf")) {
+                      return <iframe key={`${index}-${attachIndex}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${attachIndex}`} className="mt-2 rounded-md" />;
+                    }
                     return (
-                      <div key={`${index}-${attachIndex}`}>
-                        <Dialog>
-                          <DialogTrigger>
-                            <Image src={attachment.url || "/placeholder.svg"} width={200} height={200} alt={attachment.name ?? `attachment-${attachIndex}`} className="mt-2 rounded-md" />
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>{attachment.name || `Image ${attachIndex + 1}`}</DialogTitle>
-                            </DialogHeader>
-                            <Image src={attachment.url || "/placeholder.svg"} width={800} height={800} alt={attachment.name ?? `attachment-${attachIndex}`} className="rounded-md bg-auto bg-no-repeat bg-center" />
-                          </DialogContent>
-                        </Dialog>
+                      <div key={`${index}-${attachIndex}`} className="mt-2 p-3 bg-muted rounded-md">
+                        <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm hover:underline">
+                          <DocsIcon className="h-4 w-4" />
+                          {attachment.name || `File ${attachIndex + 1}`}
+                        </a>
                       </div>
                     );
-                  }
-                  if (attachment.contentType?.startsWith("application/pdf")) {
-                    return <iframe key={`${index}-${attachIndex}`} src={attachment.url} width="200" height="200" title={attachment.name ?? `attachment-${attachIndex}`} className="mt-2 rounded-md" />;
-                  }
-                  return (
-                    <div key={`${index}-${attachIndex}`} className="mt-2 p-3 bg-muted rounded-md">
-                      <a href={attachment.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm hover:underline">
-                        <DocsIcon className="h-4 w-4" />
-                        {attachment.name || `File ${attachIndex + 1}`}
-                      </a>
-                    </div>
-                  );
-                })}
+                  })}
 
-                {/* Regenerate button for assistant messages */}
-                {message.role === "assistant" && (
-                  <div className="mt-2">
-                    <Button variant="outline" size="sm" className="text-xs" onClick={() => reload()}>
-                      <RefreshCw className="h-3 w-3 mr-1" /> Regenerate
-                    </Button>
-                  </div>
-                )}
+                  {/* Regenerate button for assistant messages */}
+                  {message.role === "assistant" && (
+                    <div className="mt-2">
+                      <Button variant="outline" size="sm" className="text-xs" onClick={() => reload()}>
+                        <RefreshCw className="h-3 w-3 mr-1" /> Regenerate
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            ))}
+
+            {/* Show thinking indicator when loading */}
+            {isLoading && <ThinkingIndicator />}
+          </>
         )}
 
         {error && (
@@ -476,20 +528,30 @@ const JackieUI: React.FC = () => {
             placeholder="Ketik pesan Anda di sini..."
             className="min-h-[60px] max-h-[120px] resize-none text-sm bg-background pr-[90px]"
             rows={2}
+            disabled={isLoading}
           />
           <div className="absolute right-2 bottom-2 flex items-center gap-1">
-            <label htmlFor="file-upload" className="cursor-pointer">
+            <label htmlFor="file-upload" className={`cursor-pointer ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
               <div className="rounded-full p-2 hover:bg-muted transition-colors">
                 <Paperclip size={18} className="text-muted-foreground" />
               </div>
-              <input id="file-upload" type="file" className="hidden" multiple onChange={handleFileChange} ref={fileInputRef} />
+              <input id="file-upload" type="file" className="hidden" multiple onChange={handleFileChange} ref={fileInputRef} disabled={isLoading} />
             </label>
             <Button 
               type="submit" 
-              disabled={(!input.trim() && !files) || false} 
-              className="bg-puscom hover:bg-puscom-light text-white h-8 w-8 rounded-full p-0"
+              disabled={(!input.trim() && !files) || isLoading} 
+              className={`bg-puscom hover:bg-puscom-light text-white h-8 w-8 rounded-full p-0 ${isLoading ? 'opacity-50' : ''}`}
             >
-              <Send size={16} />
+              {isLoading ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <RefreshCw size={14} />
+                </motion.div>
+              ) : (
+                <Send size={16} />
+              )}
               <span className="sr-only">Kirim</span>
             </Button>
           </div>
