@@ -14,6 +14,7 @@ import { Input } from "@/src/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
 import { Separator } from "@/src/components/ui/separator";
+import Image from "next/image";
 
 type Product = {
   id: string;
@@ -235,9 +236,11 @@ export default function ProductDashboard() {
                 <Card key={product.id} className="overflow-hidden border-0 shadow-sm bg-white dark:bg-gray-800 dark:border-gray-700">
                   <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
                     {product.images && product.images[0] ? (
-                      <img 
+                      <Image 
                         src={product.images[0]} 
                         alt={product.name} 
+                        width={0}
+                        height={0}
                         className="w-full h-full object-cover"
                       />
                     ) : (
