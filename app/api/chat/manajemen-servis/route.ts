@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { streamText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { db, storage } from "@/src/config/FirebaseConfig";
