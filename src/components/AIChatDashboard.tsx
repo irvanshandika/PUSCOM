@@ -361,7 +361,7 @@ const RaniAIServiceAssistant: React.FC = () => {
       <div className="p-3 rounded-lg bg-muted text-foreground rounded-bl-none animate-pulse">
         <div className="flex items-center gap-2 mb-1">
           <Bot size={16} className="text-puscom" />
-          <span className="font-medium text-sm">Jackie AI</span>
+          <span className="font-medium text-sm">Rani AI</span>
         </div>
         <div className="flex items-center">
           <span className="text-sm mr-2">Thinking</span>
