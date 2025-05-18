@@ -54,41 +54,42 @@ export default function ServiceHistory() {
       try {
         setLoading(true);
         const serviceRef = collection(db, "service_requests");
-        
+
         // Buat query tanpa orderBy untuk menghindari kebutuhan index
-        const q = query(
-          serviceRef,
-          where("uid", "==", user.uid)
-        );
+        const q = query(serviceRef, where("uid", "==", user.uid));
 
         // Gunakan onSnapshot untuk real-time updates
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          const services: ServiceRequest[] = [];
-          querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            services.push({
-              id: doc.id,
-              deviceType: data.deviceType,
-              computerTypes: data.computerTypes,
-              brand: data.brand,
-              customBrand: data.customBrand,
-              model: data.model,
-              damage: data.damage,
-              date: data.date,
-              status: data.status,
-              createdAt: data.createdAt?.toDate() || new Date(),
+        const unsubscribe = onSnapshot(
+          q,
+          (querySnapshot) => {
+            const services: ServiceRequest[] = [];
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              services.push({
+                id: doc.id,
+                deviceType: data.deviceType,
+                computerTypes: data.computerTypes,
+                brand: data.brand,
+                customBrand: data.customBrand,
+                model: data.model,
+                damage: data.damage,
+                date: data.date,
+                status: data.status,
+                createdAt: data.createdAt?.toDate() || new Date(),
+              });
             });
-          });
 
-          // Sort data di client side
-          services.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-          setServiceHistory(services);
-          setLoading(false);
-        }, (error) => {
-          console.error("Error fetching service history:", error);
-          toast.error("Gagal memuat riwayat servis");
-          setLoading(false);
-        });
+            // Sort data di client side
+            services.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            setServiceHistory(services);
+            setLoading(false);
+          },
+          (error) => {
+            console.error("Error fetching service history:", error);
+            toast.error("Gagal memuat riwayat servis");
+            setLoading(false);
+          }
+        );
 
         return () => unsubscribe();
       } catch (error) {
@@ -117,12 +118,7 @@ export default function ServiceHistory() {
     const date = item.date.toLowerCase();
     const status = item.status.toLowerCase();
 
-    return (
-      deviceName.includes(searchString) ||
-      damage.includes(searchString) ||
-      date.includes(searchString) ||
-      status.includes(searchString)
-    );
+    return deviceName.includes(searchString) || damage.includes(searchString) || date.includes(searchString) || status.includes(searchString);
   });
 
   const handleViewDetail = (serviceId: string) => {
@@ -173,13 +169,7 @@ export default function ServiceHistory() {
         <h2 className="text-2xl font-bold">Riwayat Servis</h2>
         <div className="relative w-full sm:w-auto">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400" />
-          <Input 
-            type="search" 
-            placeholder="Cari riwayat servis..." 
-            className="pl-8 w-full"
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)} 
-          />
+          <Input type="search" placeholder="Cari riwayat servis..." className="pl-8 w-full" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
       </div>
 
@@ -207,13 +197,9 @@ export default function ServiceHistory() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{getDeviceName(item)}</TableCell>
                   <TableCell className="max-w-xs truncate">{item.damage}</TableCell>
+                  <TableCell>{format(new Date(item.date), "dd MMMM yyyy", { locale: id })}</TableCell>
                   <TableCell>
-                    {format(new Date(item.date), "dd MMMM yyyy", { locale: id })}
-                  </TableCell>
-                  <TableCell>
-                    <span className={getStatusColor(item.status)}>
-                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                    </span>
+                    <span className={getStatusColor(item.status)}>{item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -225,20 +211,8 @@ export default function ServiceHistory() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => handleViewDetail(item.id)}>
-                          Lihat Detail
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handlePrintReceipt(item.id)}>
-                          Cetak Resi
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => {
-                            toast.error("Fitur dalam pengembangan");
-                          }}
-                        >
-                          Hubungi Teknisi
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewDetail(item.id)}>Lihat Detail</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handlePrintReceipt(item.id)}>Cetak Resi</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
