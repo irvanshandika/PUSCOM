@@ -213,6 +213,12 @@ export default function ServiceHistory() {
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => handleViewDetail(item.id)}>Lihat Detail</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handlePrintReceipt(item.id)}>Cetak Resi</DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            toast.error("Fitur dalam pengembangan");
+                          }}>
+                          Hubungi Teknisi
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
