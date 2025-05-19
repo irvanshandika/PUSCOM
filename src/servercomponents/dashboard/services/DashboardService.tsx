@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { collection, getDocs, doc, updateDoc, query, orderBy, addDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, query, orderBy, addDoc, getDoc } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
 import { ServiceRequest } from "@/src/types/service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
@@ -26,19 +26,33 @@ export default function ServiceDashboardPage() {
   const [rejectReason, setRejectReason] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>("");
 
   useEffect(() => {
     fetchServices();
+    fetchCurrentUser();
   }, []);
 
-  useEffect(() => {
-    // Mendapatkan data user yang sedang login
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      setUser(currentUser);
+  // Fungsi untuk mengambil data user dari Auth dan Firestore
+  const fetchCurrentUser = async () => {
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (currentUser) {
+        setUser(currentUser);
+        
+        // Ambil data tambahan user dari Firestore termasuk phoneNumber
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserPhoneNumber(userData.phoneNumber || "");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
-  }, []);
+  };
 
   const fetchServices = async () => {
     try {
@@ -65,7 +79,7 @@ export default function ServiceDashboardPage() {
           activity,
           customerName, // Menggunakan nama pelanggan sebagai referensi
           technicianName: user.displayName,
-          phoneNumber: user.phoneNumber,
+          phoneNumber: userPhoneNumber, // Menggunakan phoneNumber dari Firestore
           timestamp: new Date(),
         });
       }
