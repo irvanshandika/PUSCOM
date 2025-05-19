@@ -65,6 +65,7 @@ export default function ServiceDashboardPage() {
           activity,
           customerName, // Menggunakan nama pelanggan sebagai referensi
           technicianName: user.displayName,
+          phoneNumber: user.phoneNumber,
           timestamp: new Date(),
         });
       }
@@ -158,10 +159,18 @@ export default function ServiceDashboardPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="pending" disabled={true}>
+                      Pending
+                    </SelectItem>
+                    <SelectItem value="in_progress" disabled={service.status === "in_progress"}>
+                      Accept
+                    </SelectItem>
+                    <SelectItem value="completed" disabled={service.status === "completed"}>
+                      Completed
+                    </SelectItem>
+                    <SelectItem value="rejected" disabled={service.status === "rejected"}>
+                      Rejected
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </TableCell>
@@ -191,15 +200,20 @@ export default function ServiceDashboardPage() {
           <CardTitle>Dashboard Service</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="active" className="space-y-4">
+          <Tabs defaultValue="pending" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="in_progress">In Progress</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
               <TabsTrigger value="rejected">Rejected</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active">
-              <ServiceTable />
+            <TabsContent value="pending">
+              <ServiceTable status="pending" />
+            </TabsContent>
+
+            <TabsContent value="in_progress">
+              <ServiceTable status="in_progress" />
             </TabsContent>
 
             <TabsContent value="completed">
