@@ -338,7 +338,7 @@ function ProfilePage() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-24 w-24">
-                      <AvatarImage src={photoPreview || ""} alt="Avatar" />
+                      <AvatarImage src={photoPreview || ""} alt="Avatar" className="object-cover" />
                       <AvatarFallback>{form.getValues().displayName?.substring(0, 2).toUpperCase() || "CN"}</AvatarFallback>
                     </Avatar>
                     <div>
@@ -360,7 +360,9 @@ function ProfilePage() {
                             onDrop={handleDrop}>
                             {photoPreview && (
                               <div className="mb-4 flex justify-center">
-                                <Image src={photoPreview} alt="Preview" width={150} height={150} className="rounded-lg max-h-40 object-cover" />
+                                <div className="relative w-40 h-40 rounded-lg overflow-hidden">
+                                  <Image src={photoPreview} alt="Preview" fill className="object-cover" />
+                                </div>
                               </div>
                             )}
                             <div className="space-y-2">
