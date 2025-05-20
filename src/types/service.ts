@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ServiceRequest {
+  technicianName: any;
   id: string;
   name: string;
   phoneNumber: string;

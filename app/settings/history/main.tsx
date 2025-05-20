@@ -12,9 +12,10 @@ import { db, auth } from "@/src/config/FirebaseConfig";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { format } from "date-fns";
-import { id } from "date-fns/locale";
+import { id, ro } from "date-fns/locale";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
+import { Separator } from "@/src/components/ui/separator";
 
 interface ServiceRequest {
   id: string;
@@ -26,6 +27,7 @@ interface ServiceRequest {
   damage: string;
   date: string;
   status: string;
+  technicianPhone?: string;
   createdAt: Date;
 }
 
@@ -75,6 +77,7 @@ export default function ServiceHistory() {
                 damage: data.damage,
                 date: data.date,
                 status: data.status,
+                technicianPhone: data.technicianPhone,
                 createdAt: data.createdAt?.toDate() || new Date(),
               });
             });
@@ -128,6 +131,15 @@ export default function ServiceHistory() {
   const handlePrintReceipt = (serviceId: string) => {
     router.push(`/receipt/${serviceId}`);
   };
+
+  const handleContactTechnician = (serviceId: string) => {
+    const service = serviceHistory.find(item => item.id === serviceId);
+    if (service?.technicianPhone) {
+      router.push(`https://wa.me/${service.technicianPhone}?text=Halo, saya ingin menanyakan tentang servis dengan ID ${serviceId}`);
+    } else {
+      toast.error("Nomor teknisi tidak tersedia");
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -213,6 +225,10 @@ export default function ServiceHistory() {
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => handleViewDetail(item.id)}>Lihat Detail</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handlePrintReceipt(item.id)}>Cetak Resi</DropdownMenuItem>
+                        <Separator />
+                        <DropdownMenuItem onClick={() => handleContactTechnician(item.id)}>
+                          Hubungi Teknisi
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

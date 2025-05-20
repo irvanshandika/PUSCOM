@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { collection, getDocs, doc, updateDoc, query, orderBy, addDoc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc, query, orderBy, getDoc } from "firebase/firestore";
 import { db } from "@/src/config/FirebaseConfig";
 import { ServiceRequest } from "@/src/types/service";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table";
@@ -70,24 +70,6 @@ export default function ServiceDashboardPage() {
     }
   };
 
-  // Fungsi untuk menyimpan aktivitas terkini ke koleksi recent_activities
-  const saveRecentActivity = async (activity: string, customerName: string) => {
-    try {
-      if (user) {
-        const recentActivityRef = collection(db, "recent_activities");
-        await addDoc(recentActivityRef, {
-          activity,
-          customerName, // Menggunakan nama pelanggan sebagai referensi
-          technicianName: user.displayName,
-          phoneNumber: userPhoneNumber, // Menggunakan phoneNumber dari Firestore
-          timestamp: new Date(),
-        });
-      }
-    } catch (error) {
-      console.error("Error saving activity:", error);
-    }
-  };
-
   const handleStatusChange = async (serviceId: string, newStatus: string) => {
     const service = services.find((s) => s.id === serviceId);
     if (!service) return;
@@ -103,14 +85,10 @@ export default function ServiceDashboardPage() {
       const serviceRef = doc(db, "service_requests", serviceId);
       await updateDoc(serviceRef, {
         status: newStatus,
+        technicianName: user?.displayName,
+        technicianPhone: userPhoneNumber,
+        updatedAt: new Date(), // Menambahkan waktu update untuk aktivitas terkini
       });
-
-      // Menyimpan aktivitas terkini dengan nama pelanggan
-      if (newStatus === "in_progress") {
-        saveRecentActivity(`${user?.displayName} mengambil alih perbaikan milik ${service.name}`, service.name);
-      } else if (newStatus === "completed") {
-        saveRecentActivity(`${user?.displayName} telah menyelesaikan perbaikan milik ${service.name}`, service.name);
-      }
 
       toast.success("Status berhasil diperbarui");
       fetchServices();
@@ -131,10 +109,10 @@ export default function ServiceDashboardPage() {
       await updateDoc(serviceRef, {
         status: "rejected",
         rejectedReason: rejectReason,
+        technicianName: user?.displayName,
+        technicianPhone: userPhoneNumber,
+        updatedAt: new Date(), // Menambahkan waktu update untuk aktivitas terkini
       });
-
-      // Menyimpan aktivitas terkini untuk penolakan dengan nama pelanggan
-      saveRecentActivity(`${user?.displayName} menolak perbaikan milik ${selectedService.name} dengan alasan: ${rejectReason}`, selectedService.name);
 
       toast.success("Service telah ditolak");
       setShowRejectDialog(false);
@@ -291,7 +269,7 @@ export default function ServiceDashboardPage() {
                 <p className="font-medium whitespace-pre-wrap">{selectedService.damage}</p>
               </div>
 
-              {selectedService.images.length > 0 && (
+              {selectedService.images && selectedService.images.length > 0 && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Foto Kerusakan</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -308,6 +286,13 @@ export default function ServiceDashboardPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Alasan Penolakan</p>
                   <p className="font-medium text-red-500">{selectedService.rejectedReason}</p>
+                </div>
+              )}
+
+              {selectedService.technicianName && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Teknisi</p>
+                  <p className="font-medium">{selectedService.technicianName}</p>
                 </div>
               )}
             </div>
