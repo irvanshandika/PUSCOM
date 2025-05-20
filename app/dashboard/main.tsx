@@ -8,6 +8,7 @@ import ChartServicesComponent from "@/src/components/ChartServicesComponent";
 import TotalProducts from "@/src/servercomponents/dashboard/dashboard/TotalProducts";
 import TotalUsers from "@/src/servercomponents/dashboard/dashboard/TotalUsers";
 import HistoriesActivitie from "@/src/servercomponents/dashboard/dashboard/HistoriesActivitie";
+import TotalServices from "@/src/servercomponents/dashboard/dashboard/TotalServices";
 
 // Definisikan tipe untuk role yang diizinkan
 type AllowedRoles = "admin" | "teknisi";
@@ -88,13 +89,11 @@ function DashboardPage() {
             <div className="space-y-8">
               <ChartServicesComponent />
 
-              {/* Tampilkan komponen berdasarkan role */}
-              {userRole === "admin" && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <TotalUsers />
                   <TotalProducts />
+                  <TotalServices />
                 </div>
-              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <HistoriesActivitie />
